@@ -9,6 +9,24 @@
 # - ise-psn-2
 # - ise-pxg-1
 # - ise-pxg-2
+#
+# roles: # use [] (no roles) for dedicated PSN
+#   - Standalone
+#   - PrimaryAdmin
+#   - PrimaryMonitoring
+#   - SecondaryAdmin
+#   - SecondaryMonitoring
+#   - PrimaryDedicatedMonitoring
+#   - SecondaryDedicatedMonitoring
+# services: # use [] (no services) for dedicated PAN/MNT
+#   - DeviceAdmin
+#   - Profiler
+#   - Session
+#   - pxGrid
+#   - pxGridCloud
+#   - PassiveIdentity
+#   - SXP
+#   - TC-NAC
 #------------------------------------------------------------------------------
 
 ise_nodes:
