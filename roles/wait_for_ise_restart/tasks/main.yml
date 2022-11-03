@@ -1,0 +1,55 @@
+---
+# tasks file for roles/wait_for_ise_restart
+
+- name: Wait for ⬇ Reboot⬆ | {{ wait_hostname }} ({{ wait_host_ip }})
+  delegate_to: localhost
+  vars:
+    wait_timeout: "{{ 30 * 60 }}" # 1800s == 30 minutes per port
+  with_items:
+    - 443 # SSH/REST/API Gateway
+    - 80 # Admin UI redirect to 443
+    - 22 # SSH
+  ansible.builtin.wait_for:
+    host: "{{ wait_host_ip }}"
+    port: "{{ item }}"
+    state: stopped # Port is CLOSED
+    delay: "{{ wait_delay }}"
+    sleep: "{{ wait_sleep }}"
+    timeout: "{{ wait_timeout }}"
+
+    # sleep: 3 # Default: 1. Seconds to sleep between checks. 💡 10 seconds is not fast enough to catch SSH???
+    # timeout: "{{ wait_timeout }}" # Default: 300. Stop checking after <seconds>
+  ignore_errors: yes # Errors do not stop execution
+
+- name: Wait for Ports⬆⬆⬆ | {{ wait_hostname }} ({{ wait_host_ip }})
+  delegate_to: localhost
+  vars:
+    wait_timeout: "{{ 30 * 60 }}" # 1800s == 30 minutes per port
+  with_items:
+    - 22 # SSH
+    - 80 # Admin UI redirect to 443
+    - 443 # SSH/REST/API Gateway
+  ansible.builtin.wait_for:
+    host: "{{ wait_host_ip }}"
+    port: "{{ item }}"
+    state: started
+    delay: "{{ wait_delay }}"
+    sleep: "{{ wait_sleep }}"
+    timeout: "{{ wait_timeout }}"
+    # sleep: 3
+    # timeout: "{{ wait_timeout }}"
+  ignore_errors: yes # Errors do not stop execution
+
+- name: Wait for ISE Login ({{ wait_retries * (wait_delay + wait_uri_timeout) }}s) | {{ wait_hostname }} ({{ wait_host_ip }})
+  delegate_to: localhost
+  ansible.builtin.uri:
+    url: https://{{ wait_host_ip }}/admin/login.jsp
+    method: GET
+    follow_redirects: safe
+    timeout: "{{ wait_uri_timeout }}"
+    validate_certs: "{{ wait_validate_certs }}"
+    return_content: no
+  register: result
+  until: result.status == 200
+  retries: "{{ wait_retries }}"
+  delay: "{{ wait_sleep }}" # wait between checks

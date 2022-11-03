@@ -1,0 +1,9 @@
+---
+- name: Monitor ISE Application Server Status
+  hosts: ise
+  gather_facts: no
+  vars_files:
+    - vars/main.yaml
+  roles:
+    - wait_for_ssh
+    - ise_cli_wait_for_app_server

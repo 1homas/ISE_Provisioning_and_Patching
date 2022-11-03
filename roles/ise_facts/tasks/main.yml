@@ -1,0 +1,52 @@
+---
+#------------------------------------------------------------------------------
+# Create an `ise_facts` varible which is a list of dicts with details
+# about the current state of each ISE node in the deployment.
+#
+# Use the inventory variable `groups` for all hostnames in `group_name: ise`.
+# Iterate over each of these hosts to get their current state information.
+# Use the `hostvars` information to get their current IP in `ansible_host`.
+#
+# Example output:
+# ise_facts:
+#   - name: ise-1
+#     fqdn: ise-1.trust0.net
+#     hostname: ise
+#     version: 3.1.0.518
+#     patch: '4'
+#     ipAddress: 172.31.2.11
+#     roles: PrimaryAdmin,PrimaryMonitoring
+#     services: Session,Profiler,DeviceAdmin,pxGrid,pxGridCloud
+#     ...
+#   - name: ise-2
+#     ...
+#   - name: ise-3
+#     ...
+#------------------------------------------------------------------------------
+
+- name: Get ISE PPAN Name from Inventory
+  ansible.builtin.set_fact:
+    ise_ppan_name: "{{ groups['role_PrimaryAdmin'] | first }}"
+
+- name: Get All ISE Node Names and IDs
+  delegate_to: localhost
+  cisco.ise.node_info:
+    ise_hostname: "{{ hostvars[ise_ppan_name].ansible_host }}"
+    ise_username: "{{ ise_username }}"
+    ise_password: "{{ ise_password }}"
+    ise_verify: "{{ ise_verify }}"
+    ise_debug: "{{ ise_debug }}"
+  register: nodes_info
+
+# - name: Set ISE Node Names
+#   ansible.builtin.set_fact:
+#     ise_nodes: "{{ nodes_info.ise_response | json_query('[].name') }}"
+
+- name: Get ISE Facts via PPAN
+  vars:
+    ansible_host: "{{ hostvars[ise_ppan_name].ansible_host }}"
+    ise_nodes: "{{ nodes_info.ise_response | json_query('[].name') }}"
+  loop: "{{ ise_nodes }}"
+  ansible.builtin.include_tasks: node_facts.yaml
+
+# - ansible.builtin.debug: var=ise_facts

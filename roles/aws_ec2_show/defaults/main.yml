@@ -1,0 +1,20 @@
+---
+# defaults file for roles/aws_ec2_show
+
+# show_filters:
+#   "tag:project": "{{ project_name }}"
+#   instance-state-name: running
+
+show_head: # []  # attribute names
+  [
+    # "image_id",
+    # "instance_id",
+    "instance_type",
+    "key_name",
+    "private_ip_address",
+    "public_ip_address",
+    # "security_groups",
+    # "state",
+  ]
+show_hide: [] # hide these attribute
+show_maxw: 40 # maximum width of any column

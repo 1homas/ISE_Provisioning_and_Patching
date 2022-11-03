@@ -1,0 +1,11 @@
+---
+- name: ISE Facts from Standalone Nodes
+  hosts: localhost
+  gather_facts: no
+  vars_files: vars/main.yaml
+  roles:
+    - role: ise_facts_standalone
+      run_once: yes
+
+    - role: ise_facts_table
+      run_once: yes

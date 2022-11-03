@@ -1,0 +1,36 @@
+---
+# tasks file for roles/wait_for_ise_login
+
+- name: Wait for SSH ({{ wait_timeout }}s) #| {{ inventory_hostname }} ({{ ansible_host }})
+  delegate_to: localhost
+  ansible.builtin.wait_for:
+    host: "{{ ansible_host }}"
+    port: 22
+    state: "{{ wait_state }}"
+    delay: "{{ wait_delay }}"
+    sleep: "{{ wait_sleep }}"
+    timeout: "{{ wait_timeout }}"
+
+- name: Wait for HTTPS ({{ wait_timeout }}s) #| {{ inventory_hostname }} ({{ ansible_host }})
+  delegate_to: localhost
+  ansible.builtin.wait_for:
+    host: "{{ ansible_host }}"
+    port: 443
+    state: "{{ wait_state }}"
+    delay: "{{ wait_delay }}"
+    sleep: "{{ wait_sleep }}"
+    timeout: "{{ wait_timeout }}"
+
+- name: Wait for ISE Login ({{ wait_retries * (wait_delay + wait_uri_timeout) }}s) #| {{ inventory_hostname }} ({{ ansible_host }})
+  delegate_to: localhost
+  ansible.builtin.uri:
+    url: https://{{ ansible_host }}/admin/login.jsp
+    method: GET
+    follow_redirects: safe
+    timeout: "{{ wait_uri_timeout }}"
+    validate_certs: "{{ wait_validate_certs }}"
+    return_content: no
+  register: result
+  until: result.status == 200
+  retries: "{{ wait_retries }}"
+  delay: "{{ wait_sleep }}" # wait between checks

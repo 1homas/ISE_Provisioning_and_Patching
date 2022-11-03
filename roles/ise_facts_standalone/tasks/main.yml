@@ -1,0 +1,34 @@
+---
+#------------------------------------------------------------------------------
+# Create an `ise_facts` variable which is a list of dicts with details
+# about the current state of each ISE node in the deployment.
+#
+# Use the inventory variable `groups` for all hostnames in `group_name: ise`.
+# Iterate over each of these hosts to get their current state information.
+# Use the `hostvars` information to get their current IP in `ansible_host`.
+#
+# Example output:
+# ise_facts:
+#   - name: ise-1
+#     fqdn: ise-1.trust0.net
+#     hostname: ise
+#     version: 3.1.0.518
+#     patch: '4'
+#     ipAddress: 172.31.2.11
+#     roles: PrimaryAdmin,PrimaryMonitoring
+#     services: Session,Profiler,DeviceAdmin,pxGrid,pxGridCloud
+#     ...
+#   - name: ise-2
+#     ...
+#   - name: ise-3
+#     ...
+#------------------------------------------------------------------------------
+
+- name: ISE Node Names
+  ansible.builtin.set_fact:
+    ise_node_names: "{{ groups[group_name] }}"
+
+- name: Get ISE Facts for all nodes in the ISE Deployment from the Primary PAN
+  loop: "{{ ise_node_names }}"
+  ansible.builtin.include_tasks: node_facts.yaml
+

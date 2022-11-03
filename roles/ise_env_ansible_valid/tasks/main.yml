@@ -1,0 +1,56 @@
+---
+# tasks file for roles/ise_env_ansible_valid
+
+- name: Check Environment Status Cache
+  delegate_to: localhost
+  ansible.builtin.stat:
+    path: "{{ cache_file }}"
+  register: status
+
+- name: Check ISE Environment Variables
+  when: not status.stat.exists or (( '%s' | strftime | int ) - ( status.stat.mtime | int )) > cache_time
+  block:
+    - name: Check ISE Environment Variables
+      delegate_to: localhost
+      when: lookup('env', item) is undefined
+      loop:
+        - ISE_REST_USERNAME
+        - ISE_REST_PASSWORD
+        - ISE_VERIFY
+        - ISE_DEBUG
+        - ISE_RADIUS_SECRET
+        - ISE_TACACS_SECRET
+      ansible.builtin.fail:
+        msg: |+
+          ❌ Please set environment variable {{ item }}
+
+          export {{ item }}=__________
+
+
+    - name: Validate ISE Module Variables
+      loop:
+        - ise_username
+        - ise_password
+        - ise_verify
+        - ise_debug
+      ansible.builtin.fail:
+      when: item is undefined
+
+    - name: Validate Minimum cisco.ise Ansible Package
+      delegate_to: localhost
+      when: lookup('community.general.collection_version', 'cisco.ise') is version('2.5.0', '<')
+      ansible.builtin.fail:
+        msg: ❌  Ansible package cisco.ise is < {{ cisco_ise_package_minimum }} ({{ lookup('community.general.collection_version', 'cisco.ise') }}
+
+
+- name: Cache Environment Status with Hidden File
+  delegate_to: localhost
+  ansible.builtin.file:
+    path: "{{ cache_file }}"
+    state: touch
+  when: not status.stat.exists
+    or
+    (( '%s' | strftime | int ) - ( status.stat.mtime | int )) > cache_time
+#   register: touched
+# - ansible.builtin.debug: var=touched.diff.after.mtime
+

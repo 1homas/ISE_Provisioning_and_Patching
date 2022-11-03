@@ -1,0 +1,93 @@
+---
+#
+# Certificate Tasks
+#
+- name: ISE Certificate Installation Playbook
+  hosts: ise
+  gather_facts: no
+  vars_files: vars/main.yaml
+  tasks:
+    #----------------------------------------------------------------------------
+    # system_certificate_info – Info module for System Certificate
+    #----------------------------------------------------------------------------
+
+    - name: Get System Certificates | {{ inventory_hostname }}
+      cisco.ise.system_certificate_info:
+        ise_hostname: "{{ ansible_host }}"
+        ise_username: "{{ ise_username }}"
+        ise_password: "{{ ise_password }}"
+        ise_verify: "{{ ise_verify }}"
+        ise_debug: "{{ ise_debug }}"
+        hostName: "{{ inventory_hostname }}"
+      register: system_certs_info
+
+    - name: Show system_certs_info | {{ inventory_hostname }}
+      when: system_certs_info is defined and system_certs_info.ise_response | count > 0
+      ansible.builtin.debug: var=system_certs_info.ise_response
+
+    - name: Show system_certs_info | {{ inventory_hostname }}
+      when: system_certs_info is defined and system_certs_info.ise_response | count > 0
+      delegate_to: localhost
+      vars:
+        maxw: 28
+        head:
+          ["expirationDate", "selfSigned", "keySize", "friendlyName", "usedBy"]
+        # hide: ['link']
+        rows: "{{ system_certs_info.ise_response }}"
+        temp: "{{ lookup('template', 'list_of_dicts.j2') }}"
+      ansible.builtin.shell: "echo '{{ temp }}' > /dev/tty"
+
+    #----------------------------------------------------------------------------
+    # trusted_certificate_info – Info module for Trusted Certificate
+    #----------------------------------------------------------------------------
+
+    - name: Get Trusted Certificates | {{ inventory_hostname }}
+      cisco.ise.trusted_certificate_info:
+        ise_hostname: "{{ ansible_host }}"
+        ise_username: "{{ ise_username }}"
+        ise_password: "{{ ise_password }}"
+        ise_verify: "{{ ise_verify }}"
+        ise_debug: "{{ ise_debug }}"
+      register: trusted_certs_info
+
+    - name: Show trusted_certs_info | {{ inventory_hostname }}
+      when: trusted_certs_info is defined and trusted_certs_info.ise_response | count > 0
+      ansible.builtin.debug: var=trusted_certs_info.ise_response
+
+    - name: Show trusted_certs_info | {{ inventory_hostname }}
+      when: trusted_certs_info is defined and trusted_certs_info.ise_response | count > 0
+      delegate_to: localhost
+      vars:
+        maxw: 40
+        head: ['expirationDate','friendlyName','trustedFor'] # 'usedBy','selfSigned','keySize'
+        # hide: ['link']
+        rows: "{{ trusted_certs_info.ise_response }}"
+        temp: "{{ lookup('template', 'list_of_dicts.j2') }}"
+      ansible.builtin.shell: "echo '{{ temp }}' > /dev/tty"
+
+    #----------------------------------------------------------------------------
+    # csr_info – Information module for CSR
+    #----------------------------------------------------------------------------
+
+    - name: Get CSR | {{ inventory_hostname }}
+      cisco.ise.csr_info:
+        ise_hostname: "{{ ansible_host }}"
+        ise_username: "{{ ise_username }}"
+        ise_password: "{{ ise_password }}"
+        ise_verify: "{{ ise_verify }}"
+      register: csr_info
+
+    - name: Show csr_info | {{ inventory_hostname }}
+      when: csr_info is defined and csr_info.ise_response | count > 0
+      ansible.builtin.debug: var=csr_info
+
+    - name: Show csr_info | {{ inventory_hostname }}
+      when: csr_info is defined and csr_info.ise_response | count > 0
+      delegate_to: localhost
+      vars:
+        maxw: 30
+        # head: ['expirationDate','friendlyName','trustedFor'] # 'usedBy','selfSigned','keySize'
+        # hide: ['link']
+        rows: "{{ csr_info.ise_response }}"
+        temp: "{{ lookup('template', 'list_of_dicts.j2') }}"
+      ansible.builtin.shell: "echo '{{ temp }}' > /dev/tty"

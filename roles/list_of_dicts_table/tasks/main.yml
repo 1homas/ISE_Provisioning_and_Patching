@@ -1,0 +1,12 @@
+---
+# tasks file for roles/list_of_dicts_table
+- name: Show List of Dicts Table
+  # when: table_rows is defined and table_rows | length > 0
+  delegate_to: localhost
+  vars:
+    # maxw: "{{ table_maxw | default(omit) }}"
+    head: "{{ table_head | default(omit) }}"
+    hide: "{{ table_hide | default([]) }}"
+    rows: "{{ table_rows }}"
+    temp: "{{ lookup('template', 'list_of_dicts.j2') }}"
+  ansible.builtin.shell: "echo '{{ temp }}' > /dev/tty"

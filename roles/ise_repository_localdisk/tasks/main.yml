@@ -1,0 +1,13 @@
+---
+- name: Create DISK Repository | {{ inventory_hostname }} ({{ ansible_host }})
+  cisco.ise.repository:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username }}"
+    ise_password: "{{ ise_password }}"
+    ise_verify: "{{ ise_verify }}"
+    ise_debug: "{{ ise_debug }}"
+    state: "{{ state | default('present') }}"
+    protocol: DISK
+    name: LOCALDISK
+    path: /
+  register: repository

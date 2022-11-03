@@ -1,0 +1,115 @@
+---
+- name: ISE Restore Configuration Playbook
+  hosts: ise
+  gather_facts: no
+  vars_files:
+    - vars/main.yaml
+  vars:
+    config_filename: 20221022_dCloud_3.2_Demos_iseadmin-CFG10-221022-1725.tar.gpg
+  roles:
+    - wait_for_ssh # Cannot proceed without SSH
+    - ise_env_ansible_valid # ISE Ansible environment is OK
+    - ise_env_dcloud_valid # ISE dCloud environment is OK
+    - wait_for_ise_login # ISE GUI Login and REST APIs available
+    - ise_facts # gather ISE version, patch, & node info
+    - role: ise_repository
+      vars:
+        repo_name: "{{ lookup('env','ISE_REPOSITORY') }}"
+        repo_protocol: "{{ lookup('env','ISE_REPOSITORY_PROTOCOL') }}"
+        repo_server: "{{ lookup('env','ISE_REPOSITORY') }}"
+        repo_path: "{{ lookup('env','ISE_REPOSITORY_PATH') }}"
+        repo_username: "{{ lookup('env','ISE_REPOSITORY_USERNAME') }}"
+        repo_password: "{{ lookup('env','ISE_REPOSITORY_PASSWORD') }}"
+
+  tasks:
+    - name: Get Configuration Filename
+      block:
+        - name: Get Backup Name
+          ansible.builtin.pause:
+            prompt: What is the configuration filename to restore ({{ config_filename }})?
+          register: result
+        - name: Set Configuration Filename
+          when: result is defined and result.user_input != ""
+          ansible.builtin.set_fact:
+            config_filename: "{{ result.user_input | trim }}"
+
+    - ansible.builtin.debug: var=config_filename
+
+    - name: Restore backup
+      when: config_filename is defined
+      cisco.ise.backup_restore:
+        ise_hostname: "{{ ansible_host }}"
+        ise_username: "{{ ise_username }}"
+        ise_password: "{{ ise_password }}"
+        ise_verify: "{{ ise_verify }}"
+        ise_debug: "{{ ise_debug }}"
+        repositoryName: "{{ lookup('env','ISE_REPOSITORY') }}"
+        backupEncryptionKey: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
+        restoreFile: "{{ config_filename }}"
+        restoreIncludeAdeos: no
+      register: restore_status
+
+    - ansible.builtin.debug: var=restore_status
+
+    - name: Set Restore Task ID | {{ restore_status.ise_response.response.id }}
+      ansible.builtin.set_fact:
+        task_id: "{{ restore_status.ise_response.response.id }}"
+
+    - name: Wait for ISE Application Server Stopped | {{ inventory_hostname }} ({{ ansible_host }})
+      delegate_to: localhost
+      ansible.builtin.wait_for:
+        host: "{{ ansible_host }}"
+        port: 443 # SSH/REST/API Gateway
+        state: stopped # Port is CLOSED
+        sleep: 10 # Default: 1. Seconds to sleep between checks.
+        timeout: "{{ 60 * 60 }}" # 3600s == 1 hour # Default: 300. Stop checking after <seconds>
+      ignore_errors: yes # Errors do not stop execution
+
+    - name: Wait for ISE Application Server Started | {{ inventory_hostname }} ({{ ansible_host }})
+      delegate_to: localhost
+      ansible.builtin.wait_for:
+        host: "{{ ansible_host }}"
+        port: 443 # SSH/REST/API Gateway
+        state: started
+        sleep: 10 # Default: 1. Seconds to sleep between checks.
+        timeout: "{{ 60 * 60 }}" # 3600s == 1 hour # Default: 300. Stop checking after <seconds>
+      ignore_errors: yes # Errors do not stop execution
+
+    - name: Wait for ISE Login | {{ inventory_hostname }} ({{ ansible_host }})
+      delegate_to: localhost
+      ansible.builtin.uri:
+        url: https://{{ ansible_host }}/admin/login.jsp
+        method: GET
+        follow_redirects: safe
+        timeout: 10
+        validate_certs: no
+        return_content: no
+      register: result
+      until: result.status == 200
+      retries: 180 # 180 * 10 seconds = 1800s = 30 minutes
+      delay: 10
+
+    - name: Restore Task Status | {{ inventory_hostname }} ({{ ansible_host }})
+      cisco.ise.tasks_info:
+        ise_hostname: "{{ ansible_host }}"
+        ise_username: "{{ ise_username }}"
+        ise_password: "{{ ise_password }}"
+        ise_verify: "{{ ise_verify }}"
+        ise_debug: "{{ ise_debug }}"
+        taskId: "{{ task_id }}"
+      register: task_status
+      until: task_status.ise_response.failCount != None or task_status.ise_response.successCount != None
+      delay: 10 # Default: 0. Seconds to wait before first check
+      retries: 360
+      timeout: 30 # Default: 300. Stop checking after <seconds>
+      ignore_errors: yes
+
+    - name: Restore Progress
+      when: status.justComplete == 'no'
+      ansible.builtin.debug:
+        msg: "{{ status.name }} {{ status.message }} {{ status.percentComplete }}% : {{ status.hostName }} {{ status.startDate }}"
+
+    - name: Restore Success
+      when: status.justComplete == 'yes'
+      ansible.builtin.debug:
+        msg: "{{ status.hostName }} {{ status.status }} {{ status.message }}"

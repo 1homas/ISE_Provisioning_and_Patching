@@ -1,0 +1,47 @@
+---
+#
+# ansible-playbook 1_provision.yaml --ask-pass
+#
+- name: Provision AWS VPC & ISE
+  hosts: localhost
+  gather_facts: no
+  vars_files:
+    - vars/main.yaml
+    # - vars/ise_deployment_standalone.yaml
+    # - vars/ise_deployment_small.yaml  # ⬅ ise_nodes defined in here
+    - vars/ise_deployment_medium.yaml # ⬅ ise_nodes defined in here
+    # - vars/ise_deployment_large.yaml
+  roles:
+    - aws_env_ansible_valid
+    - ise_env_ansible_valid
+    - ssh_key_local
+    - aws_ssh_keypair
+    - aws_vpc
+    - aws_security_groups
+    - aws_ise_nodes
+    - refresh_inventory
+
+- name: Initialize ISE Nodes
+  hosts: ise
+  gather_facts: no
+  vars_files: vars/main.yaml
+  roles:
+    - aws_r53_dns_entry
+    - ssh_commands
+    - wait_for_ise_login # SSH > HTTPS > Login
+
+    # 💡 ISE Application Server must be `running` to reset password!
+    - role: ise_cli_password_reset
+      vars:
+        username: "{{ lookup('env','ISE_REST_USERNAME') }}"
+        password: "{{ lookup('env','ISE_REST_PASSWORD') }}"
+      ignore_errors: yes # If we already changed it previously, keep going!
+
+    - ise_apis_enabled
+    - role: ise_facts_standalone
+      run_once: yes
+
+    - role: banner # 💡 Not supported with `strategy: free`
+      banner_name: ise_logo_small_ready
+      banner_text: ISE is Provisioned!
+      run_once: yes

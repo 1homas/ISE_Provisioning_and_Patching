@@ -1,0 +1,215 @@
+---
+# tasks file for roles/ise_patch
+
+- name: Validate Required Patch Variables
+  loop:
+    - repository_name
+    - patch_filename
+    - ise_facts
+  ansible.builtin.fail:
+    msg: "{{ item }} is undefined"
+  when: item is undefined
+
+# - ansible.builtin.debug: var=ise_facts
+
+- name: Get ISE Node
+  ansible.builtin.set_fact:
+    ise_node_facts: "{{ ise_facts | selectattr('name', 'equalto', inventory_hostname) | first }}"
+
+# - name: Show ise_node_facts
+#   ansible.builtin.debug: var=ise_node_facts
+
+#------------------------------------------------------------------------------
+# ISE patchbundle filename format:
+#
+# ise-patchbundle-[version]-[Patch#]-[YYMMDDXX].SPA.x86_64.tar.gz
+#
+# ise-patchbundle-3.1.0.518-Patch1-21120304.SPA.x86_64.tar.gz
+# ise-patchbundle-3.1.0.518-Patch3-22042809.SPA.x86_64.tar.gz
+# ise-patchbundle-3.1.0.518-Patch4-22091704.SPA.x86_64.tar.gz
+#------------------------------------------------------------------------------
+
+- name: Show patch_filename
+  ansible.builtin.debug: var=patch_filename
+
+- name: Parse Patch Filename | {{ patch_filename }}
+  ansible.builtin.set_fact:
+    ise_patch_version: "{{ patch_filename.split('-')[2] }}" # 3.1.0.518
+    ise_patch_name: "{{ patch_filename.split('-')[3] }}" # Patch1
+
+- name: Show ise_patch_version
+  ansible.builtin.debug: var=ise_patch_version
+- name: Show ise_patch_name
+  ansible.builtin.debug: var=ise_patch_name
+
+- name: Parse Patch Number | {{ ise_patch_version }} | {{ ise_patch_name }}
+  ansible.builtin.set_fact:
+    ise_patch_number: "{{ ise_patch_name[5:] }}"
+
+# - name: Show ise_patch_number
+#   ansible.builtin.debug: var=ise_patch_number
+# - name: Show ise_node_facts.version
+#   ansible.builtin.debug: var=ise_node_facts.version
+# - name: Show ise_node_facts.patch
+#   ansible.builtin.debug: var=ise_node_facts.patch
+#
+# 💡 Patch Requirements:
+# - the ISE node software major & minor versions must match the patch_filename
+# - the ISE node patch number is < the patch_filename
+#
+- name: Apply Patch
+  when:
+    - ise_node_facts.version == ise_patch_version # 3.1.0.518
+    - ise_node_facts.patch    < ise_patch_number # 4
+  block:
+    - name: Patch Install | {{ patch_filename }}
+      cisco.ise.patch_install:
+        ise_hostname: "{{ ansible_host }}"
+        ise_username: "{{ ise_username }}"
+        ise_password: "{{ ise_password }}"
+        ise_verify: "{{ ise_verify }}"
+        ise_debug: "{{ ise_debug }}"
+        repositoryName: "{{ repository_name }}"
+        patchName: "{{ patch_filename }}"
+      register: patch_status
+      failed_when: patch_status.failed
+
+    - name: Patch Install Message
+      ansible.builtin.debug:
+        msg: "{{ patch_status.ise_response.response.message }}"
+
+      # Example output:
+      # ```
+      # patch_status:
+      #   changed: false
+      #   failed: false
+      #   ise_response:
+      #     response:
+      #       id: 4aa6d570-0098-11ed-86ea-dad0d8ee139d
+      #       message: Patch install task initiated. Please use Task Service status API to get the status of the patch install job
+      #     version: 1.0.0
+      #   result: ''
+      # ```
+      # patch_status:
+      #   changed: false
+      #   failed: false
+      #   ise_response:
+      #   - detailStatus:
+      #     - File transfer error. Verify configuration
+      #     executionStatus: COMPLETED_WITH_FAILURE
+      #     failCount: 1
+      #     id: b723d080-508a-11ed-9d7a-ae0d62d58f61
+      #     moduleType: PatchInstall
+      #     resourcesCount: 1
+      #     startTime: '1666279222664'
+      #     successCount: null
+      #   - detailStatus:
+      #     - Patch Install is in progress
+      #     executionStatus: IN_PROGRESS
+      #     failCount: null
+      #     id: 156cb170-4e92-11ed-8166-e29487f2f25c
+      #     moduleType: PatchInstall
+      #     resourcesCount: 1
+      #     startTime: '1666062484999'
+      #     successCount: null
+      #   - detailStatus:
+      #     - '{"patchNumber":"4","repositoryName":"ftp.trust0.net","patchName":"ise-patchbundle-3.1.0.518-Patch4-22091704.SPA.x86_64.tar.gz","status":"Patch Installed Successfully"}'
+      #     executionStatus: COMPLETED_WITH_SUCCESS
+      #     failCount: null
+      #     id: 156cb170-4e92-11ed-8166-e29487f2f25c
+      #     moduleType: PatchInstall
+      #     resourcesCount: 1
+      #     startTime: '1666062484999'
+      #     successCount: 1
+      #   - detailStatus:
+      #     - Patch is already installed.
+      #     executionStatus: COMPLETED_WITH_FAILURE
+      #     failCount: 1
+      #     id: f62fcf30-4e97-11ed-af4a-e2f03ea0cdc7
+      #     moduleType: PatchInstall
+      #     resourcesCount: 1
+      #     startTime: '1666065009571'
+      #     successCount: null
+      #   - detailStatus:
+      #     - '{"patchNumber":"4","repositoryName":"ftp.trust0.net","patchName":"ise-patchbundle-3.1.0.518-Patch4-22091704.SPA.x86_64.tar.gz","status":"Patch Installed Successfully"}'
+      #     executionStatus: COMPLETED_WITH_SUCCESS
+      #     failCount: null
+      #     id: 156cb170-4e92-11ed-8166-e29487f2f25c
+      #     moduleType: PatchInstall
+      #     resourcesCount: 1
+      #     startTime: '1666062484999'
+      #     successCount: 1
+      #   result: ''
+      # ```
+
+    #
+    # ISE will download patch, validate it before reboot!
+    # Must monitor progress via SSH CLI because REST APIs require App Server!
+    #
+
+    - name: Wait for ⬇ Reboot⬆
+      delegate_to: localhost
+      vars:
+        wait_timeout: "{{ 30 * 60 }}" # 1800s == 30 minutes per port
+      with_items:
+        - 443 # SSH/REST/API Gateway
+        - 80 # Admin UI redirect to 443
+        - 22 # SSH
+      ansible.builtin.wait_for:
+        host: "{{ ansible_host }}"
+        port: "{{ item }}"
+        state: stopped # Port is CLOSED
+        sleep: 3 # Default: 1. Seconds to sleep between checks. 💡 10 seconds is not fast enough to catch SSH???
+        timeout: "{{ wait_timeout }}" # Default: 300. Stop checking after <seconds>
+      ignore_errors: yes # Errors do not stop execution
+
+    - name: Wait for Ports⬆⬆⬆
+      delegate_to: localhost
+      vars:
+        wait_timeout: "{{ 30 * 60 }}" # 1800s == 30 minutes per port
+      with_items:
+        - 22 # SSH
+        - 80 # Admin UI redirect to 443
+        - 443 # SSH/REST/API Gateway
+      ansible.builtin.wait_for:
+        host: "{{ ansible_host }}"
+        port: "{{ item }}"
+        state: started
+        sleep: 3
+        timeout: "{{ wait_timeout }}"
+      ignore_errors: yes # Errors do not stop execution
+
+    - name: Wait for Login | {{ inventory_hostname }} ({{ ansible_host }})
+      delegate_to: localhost
+      ansible.builtin.uri:
+        url: https://{{ ansible_host }}/admin/login.jsp
+        method: GET
+        follow_redirects: safe
+        timeout: 10
+        validate_certs: no
+        return_content: no
+      register: result
+      until: result.status == 200
+      retries: 180 # 180 * 10 seconds = 1800s = 30 minutes
+      delay: 10
+
+    # - name: Patch Task Status | {{ inventory_hostname }} ({{ ansible_host }})
+    #   cisco.ise.tasks_info:
+    #     ise_hostname: "{{ ansible_host }}"
+    #     ise_username: "{{ ise_username }}"
+    #     ise_password: "{{ ise_password }}"
+    #     ise_verify: "{{ ise_verify }}"
+    #     ise_debug: "{{ ise_debug }}"
+    #     taskId: "{{ task_id }}"
+    #   register: task_status
+    #   until: task_status.ise_response.failCount != None or task_status.ise_response.successCount != None
+    #   retries: 360
+    #   timeout: 30 # Default: 300. Stop checking after <seconds>
+    #   delay: 10 # Default: 0. Seconds to wait before first check
+    #   ignore_errors: yes
+
+  # rescue:
+  # always:
+  #   - name: Show task_status | {{ inventory_hostname }} ({{ ansible_host }})
+  #     when: task_status is defined
+  #     ansible.builtin.debug: var=task_status

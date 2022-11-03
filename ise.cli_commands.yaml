@@ -1,0 +1,58 @@
+---
+- name: Test ISE CLI Commands
+  hosts: ise
+  gather_facts: no
+  # strategy: free    # ['free','linear','serial']
+  vars_files:
+    - vars/main.yaml
+  vars:
+    cmd: show application status ise
+    commands:
+      - show udi
+      - show uptime
+      - show ports
+      - show inventory
+      - show clock
+      # - show running-config
+      # - show interface GigabitEthernet 0
+      # - show terminal
+      - show timezone
+      # - show timezones
+      # - show application status ise
+      # - show logging system ade/ADE.log # cannot use `tail`
+      # - show logging application hotpatch.log
+
+
+  pre_tasks:
+    - ansible.builtin.debug: var=ansible_ssh_user
+    - ansible.builtin.debug: var=ansible_ssh_pass
+    - ansible.builtin.debug: var=ansible_ssh_private_key_file
+
+  #----------------------------------------------------------------------------
+  # Roles
+  #----------------------------------------------------------------------------
+
+  roles:
+    - wait_for_ssh
+
+  #----------------------------------------------------------------------------
+  # Tasks
+  #----------------------------------------------------------------------------
+  # Errors with ISE <= 3.1
+  # Once you issue the `exit` command,  you get a fatal error with another command
+  # fatal: [ise]: FAILED! => changed=false
+  #   msg: 'cli prompt is not identified from the last received response window:
+  #        b''exit\r\n\x1b>\x1b[24;1H\r\n[screen is terminating]\r\n'''
+  #----------------------------------------------------------------------------
+
+  tasks:
+    - name: ISE CLI
+      loop: "{{ commands }}"
+      vars:
+        cmd: "{{ item }}"
+      ansible.builtin.include_role:
+        name: ise_cli_exec
+
+    - name: Exit
+      ansible.netcommon.cli_command:
+        command: "exit"

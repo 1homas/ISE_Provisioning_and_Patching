@@ -1,0 +1,39 @@
+---
+- name: Show ISE Application Status
+  hosts: ise
+  gather_facts: no
+  vars_files: vars/main.yaml
+  tasks:
+    # - ansible.builtin.debug:
+    #     # msg: "{{ stdout | regex_search('Application Server') | split('[\s]+')[1] == 'running' }}"
+    #     msg:
+    #     - stdout is search('Application Server*[0-9]+*')
+    #     # - "{{ stdout | search('Application Server*[0-9]+*') }}"
+    #     - "{{ stdout | regex_search('Application Server[ ]+running') }}"
+    #     - "{{ stdout | regex_search('^Application Server') }}"
+    #     # when: "{{ item }}" is match("Application Server*[0-9]+*")
+
+    # The ISE Application Server STATE may be { not running | initializing | running }
+
+    # Example status output:
+    # ```
+    # ISE PROCESS NAME                       STATE            PROCESS ID
+    # --------------------------------------------------------------------
+    # Database Listener                      running          7540
+    # Database Server                        running          129 PROCESSES
+    # Application Server                     running          55108
+    # ...
+
+    - name: ISE CLI | {{ inventory_hostname }} ({{ ansible_host }})
+      vars:
+        cmd: show application status ise
+      ansible.builtin.include_tasks: tasks/ise/cli_command.yaml
+
+    - name: ISE CLI exit | {{ inventory_hostname }} ({{ ansible_host }})
+      vars:
+        cmd: exit
+      ansible.builtin.include_tasks: tasks/ise/cli_command.yaml
+      register: output
+
+    - ansible.builtin.debug: var=output
+

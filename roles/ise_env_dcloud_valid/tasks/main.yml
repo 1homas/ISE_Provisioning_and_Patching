@@ -1,0 +1,13 @@
+---
+# tasks file for ise_env_dcloud_valid
+
+- name: Validate dCloud Environment Variables
+  delegate_to: localhost
+  when: lookup('env', 'DCLOUD_SESSION_ID') is undefined
+  ansible.builtin.fail:
+    msg: |+
+      ❌ Please set environment variable DCLOUD_SESSION_ID
+
+      export DCLOUD_SESSION_ID=######
+      export ISE_REST_PASSWORD=${DCLOUD_SESSION_ID}
+

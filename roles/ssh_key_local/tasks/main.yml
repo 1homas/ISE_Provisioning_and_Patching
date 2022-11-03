@@ -1,0 +1,59 @@
+---
+# tasks file for ssh_key_local
+
+- name: Local SSH Keypair Existence | {{ ssh_key_name }}
+  delegate_to: localhost
+  ansible.builtin.stat:
+    path: "{{ ssh_key_directory }}/{{ ssh_key_name }}"
+  register: keypair_stat
+
+- name: Create SSH Key Pair | {{ ssh_key_name }}
+  when: not keypair_stat.stat.exists
+  block:
+    - name: Validate Required Variables
+      delegate_to: localhost
+      loop:
+        - ssh_key_directory
+        - ssh_key_name
+        - ssh_key_size
+        - ssh_key_type
+        - ssh_key_private_file
+        - ssh_key_public_file
+        - ssh_key_passphrase
+      ansible.builtin.fail:
+        fail_msg: ❌ Please set variable {{ item }}
+      when: lookup('vars', item) is undefined
+
+    # ⚠ Python bcrypt module required on localhost to generate SSH keypair
+    - name: Install Python bcrypt Package
+      delegate_to: localhost
+      ansible.builtin.pip:
+        name: bcrypt
+        executable: pip3
+
+    # - ansible.builtin.debug: var=ssh_key_passphrase
+
+    - name: Get SSH Keypair Passphrase
+      when: ssh_key_passphrase is undefined
+      block:
+        - name: Get SSH Keypair Passphrase
+          ansible.builtin.pause:
+            prompt: Enter your SSH Keypair Passphrase
+          register: input
+        - name: Set SSH Keypair Passphrase
+          ansible.builtin.set_fact:
+            ssh_key_passphrase: "{{ input.user_input }}"
+
+    - name: Generate OpenSSH Keypair | {{ ssh_key_name }}
+      delegate_to: localhost
+      community.crypto.openssh_keypair:
+        state: "{{ ssh_key_state | default('present') }}"
+        force: no
+        type: "{{ ssh_key_type }}"
+        size: "{{ ssh_key_size }}"
+        comment: "{{ ssh_key_name }}"
+        path: "{{ ssh_key_directory }}/{{ ssh_key_name }}"
+        passphrase: "{{ ssh_key_passphrase }}"
+        mode: 0600 # SSH key permissions
+      register: keypair
+  # - ansible.builtin.debug: var=keypair

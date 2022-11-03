@@ -1,0 +1,42 @@
+---
+# Tags for VPCs, VMs, and Resources
+project_name: ise_pnp # tag all VPCs and resources
+owner: thomas@cisco.com
+domain_name: trust0.net
+
+ssh_key_directory: ~/.ssh
+ssh_key_name: "{{ project_name }}"
+ssh_key_private_file: "{{ ssh_key_directory }}/{{ ssh_key_name }}"
+ssh_key_public_file: "{{ ssh_key_directory }}/{{ ssh_key_name }}.pub"
+ssh_key_passphrase: "{{ project_name }}"
+
+#
+# AWS VPC
+#
+aws_region: "{{ lookup('env','AWS_REGION') | default('us-west-1') }}"
+aws_vpc_name: "{{ project_name }}"
+aws_vpc_cidr: 172.31.0.0/16
+aws_vpc_public_subnet_cidr:  172.31.1.0/24
+aws_vpc_private_subnet_cidr: 172.31.2.0/24
+
+#
+# ISE Nodes
+#
+ise_image: ami-0965fef2e601ad4d0 # us-west-1 ISE 3.1 Patch 1 20211209
+ise_instance_type_default: t3.xlarge
+ise_security_group_default: SG_Public
+timezone: America/Los_Angeles
+ntp_server: time.nist.gov
+dns_server: 208.67.222.222      # Cisco Umbrella
+
+#
+# ISE
+#
+ise_init_password: "{{ lookup('env','ISE_INIT_PASSWORD') }}"
+ise_username: "{{ lookup('env','ISE_REST_USERNAME') }}"
+ise_password: "{{ lookup('env','ISE_REST_PASSWORD') }}"
+ise_verify: "{{ lookup('env','ISE_VERIFY') | default(False, true) }}"
+ise_debug: "{{ lookup('env','ISE_DEBUG')  | default(False, true) }}"
+
+ise_radius_secret: "{{ lookup('env','ISE_RADIUS_SECRET') }}"
+ise_tacacs_secret: "{{ lookup('env','ISE_TACACS_SECRET') }}"

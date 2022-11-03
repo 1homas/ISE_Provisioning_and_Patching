@@ -1,0 +1,53 @@
+---
+# tasks file for roles/ise_backup_now
+
+- name: Validate Required Backup Variables
+  loop:
+    - backup_repository
+    - backup_name
+    - backup_encryption_key
+  ansible.builtin.fail:
+  when: item is undefined
+
+- name: Backup Configuration Now | {{ inventory_hostname }} ⮕ {{ backup_repository }})
+  cisco.ise.backup_config:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username }}"
+    ise_password: "{{ ise_password }}"
+    ise_verify: "{{ ise_verify }}"
+    ise_debug: "{{ ise_debug }}"
+    repositoryName: "{{ backup_repository }}"
+    backupName: "{{ backup_name | default( '%Y%m%d-%H%M%S' | strftime ) }}"
+    backupEncryptionKey: "{{ backup_encryption_key }}"
+  register: backup_status
+  failed_when: "'initiated' not in backup_status.ise_response.response.message"
+
+  # Example Backup Status:
+  # ```
+  # backup_status:
+  #   ise_response:
+  #     response:
+  #       id: 9c5b9c70-3252-11ed-8ded-fed6979bc33c
+  #       message: Config DB backup task initiated. Please use Task Service status API to get the status of the backup job
+  #     version: 1.0.0
+  # ```
+
+# - ansible.builtin.debug: var=backup_status
+
+- name: Backup Status | {{ inventory_hostname }} ({{ ansible_host }})
+  when: backup_status.ise_response.response.id is defined
+  vars:
+    line1: "ISE Backup Started @ {{ '%Y-%m-%dT%H:%M:%S%Z' | strftime }}"
+    line2:
+    line3: "Task ID: {{ backup_status.ise_response.response.id }}"
+    line4:
+    ok: |
+            _
+           ( |
+         ___\ \
+        (__()  `-|  {{ line1 }}
+        (___()   |  {{ line2 }}
+        (__()    |  {{ line3 }}
+        (_()__.--|  {{ line4 }}
+       
+  ansible.builtin.shell: "echo '{{ ok }}' > /dev/tty"

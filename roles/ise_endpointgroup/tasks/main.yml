@@ -1,0 +1,11 @@
+---
+# tasks file for roles/ise_endpointgroup
+
+
+  - name: Create Endpoint Groups
+    loop: "{{ endpoint_groups }}"
+    ansible.builtin.include_tasks: endpointgroup.create.yml
+    tags: [ endpointgroup ]
+
+
+...

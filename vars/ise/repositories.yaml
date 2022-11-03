@@ -1,0 +1,112 @@
+---
+repositories:
+  #----------------------------------------------------------------------------
+  # CDROM Example
+  #----------------------------------------------------------------------------
+  # - name: CDROM
+  #   serverName: ftp.example.com
+  #   protocol: CDROM
+  #   path: /
+
+  #----------------------------------------------------------------------------
+  # DISK Example
+  #----------------------------------------------------------------------------
+
+  # ISE LocalDisk Management
+  - name: LOCALDISK
+    protocol: DISK
+    path: /
+    serverName: localhost
+
+  #----------------------------------------------------------------------------
+  # FTP Example
+  #----------------------------------------------------------------------------
+
+  # - name: FTP_dCloud_Ubuntu
+  #   serverName: 198.18.134.28
+  #   protocol: FTP
+  #   path: /
+  #   userName: "{{ lookup('env','ISE_REPOSITORY_USERNAME') }}"
+  #   password: "{{ lookup('env','ISE_REPOSITORY_PASSWORD') }}"
+
+  # - name: FTP_dCloud_AD
+  #   serverName: 198.18.133.1
+  #   protocol: FTP
+  #   path: /
+  #   userName: ise
+  #   password: C1sco12345
+
+  # - name: FTP_dCloud_Workstation1
+  #   serverName: 198.18.133.36
+  #   protocol: FTP
+  #   path: /
+  #   userName: ise
+  #   password: C1sco12345
+
+  # - name: FTP_DevNet_AD
+  #   serverName: 10.10.20.90
+  #   protocol: FTP
+  #   path: /
+  #   userName: ise
+  #   password: C1sco12345
+
+  # ---------------------------------------------------------------------------
+  # HTTP Example
+  # ---------------------------------------------------------------------------
+
+  # - name: HTTP_thomas-mbp
+  #   serverName: 10.80.60.148
+  #   protocol: HTTP
+  #   path: /ISE
+  #   # userName: ""
+  #   # password: ""
+
+  # - name: repository.trust0.net
+  #   serverName: repository.trust0.net
+  #   protocol: HTTP
+  #   path: /ISE
+
+  # ---------------------------------------------------------------------------
+  # HTTPS Example
+  # ---------------------------------------------------------------------------
+  # - name: HTTPS_thomas-mbp
+  #   serverName: 10.80.60.148
+  #   protocol: HTTPS
+  #   path: /ISE
+  #   userName: ""
+  #   password: ""
+
+  # ---------------------------------------------------------------------------
+  # NFS Example
+  # ---------------------------------------------------------------------------
+  # - name: NFS-Server
+  #   serverName: 1.2.3.4
+  #   protocol: NFS
+  #   path: /
+  #   userName: ""
+  #   password: ""
+  #   enablePki: false
+
+  # ---------------------------------------------------------------------------
+  # SFTP Example
+  # ---------------------------------------------------------------------------
+
+  # - name: SFTP_Box
+  #   serverName: ftp.box.com
+  #   # port: 990           # cannot customize port!
+  #   protocol: SFTP
+  #   path: /SFTP
+  #   userName: ise         # 🐞 Cannot use an email address for the username - [.@] not allowed!
+  #   password: C1sco12345
+  #   enablePki: false
+
+  # ---------------------------------------------------------------------------
+  # TFTP Example
+  # ---------------------------------------------------------------------------
+  # - name: TFTP_Server
+  #   serverName: 198.18.133.1
+  #   protocol: TFTP
+  #   path: /
+  #   userName: ""
+  #   password: ""
+  #   enablePki: false

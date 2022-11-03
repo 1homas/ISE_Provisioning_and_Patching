@@ -1,0 +1,18 @@
+---
+# tasks file for roles/ise_internaluser
+
+#
+# Tasks for creating cisco.ise.internal_user from a list: `internal_users`
+#
+
+  - name: Create Endpoint Groups
+    loop: "{{ internal_users }}"
+    ansible.builtin.include_tasks: internal_user.create.yml
+    tags: [ internal_user ]
+
+  # - name: Results
+  #   ansible.builtin.debug: var=results
+  #   tags: internal_user, create
+
+
+...

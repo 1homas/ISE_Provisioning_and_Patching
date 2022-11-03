@@ -1,0 +1,5 @@
+---
+# defaults file for roles/aws_env_ansible_valid
+cache_file: ".aws_env_ansible_valid"
+cache_time: 28800 # seconds. Default 28800 (8 hours)
+

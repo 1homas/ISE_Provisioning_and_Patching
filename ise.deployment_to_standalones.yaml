@@ -1,0 +1,114 @@
+---
+- name: Convert ISE Deployment to Standalone Nodes
+  hosts: localhost
+  gather_facts: no
+  vars_files: vars/main.yaml
+  vars:
+    ise_ppan_name: "{{ groups['role_PrimaryAdmin'] | first }}"
+    non_ppan_names: "{{ groups['ise'] | reject('search',ise_ppan_name) }}"
+  # roles:
+  tasks:
+    #
+    # Ⰹ ISE REST API: PUT /api/v1/deployment/node/{hostname}
+    #   Updates the ISE node roles and services.
+    #   Restarts the application server
+    #   Approximate execution time - 600 seconds!
+    #
+    - name: Remove ISE Node from PPAN (Standalone)
+      loop: "{{ non_ppan_names }}"
+      cisco.ise.node_deployment:
+        ise_hostname: "{{ hostvars[ise_ppan_name].ansible_host }}" # PPAN!
+        ise_username: "{{ ise_username }}"
+        ise_password: "{{ ise_password }}"
+        ise_verify: "{{ ise_verify }}"
+        ise_debug: "{{ ise_debug }}"
+        state: absent # ⬅ Use `absent` to remove node from deployment!
+        hostname: "{{ item }}"
+      register: ise_node_update
+      timeout: 600 # Default: 300. Stop checking after <seconds>
+      ignore_errors: yes
+      # 💡 Use `ignore_errors: yes` since you may regularly get this error!
+      # [500] - The server could not fulfill the request.
+      # Internal Error - ConnectionException occurred: java.net.ConnectException:
+      # NOTE: the following deregistered node(s) are not currently reachable: ise-span.
+      # Be sure to reset the configuration on these nodes manually, as they may not revert to Standalone on their own."
+
+    # - ansible.builtin.debug: var=ise_node_update
+
+    - name: Verify All Nodes Deregistered from PPAN
+      # when: inventory_hostname == ise_ppan_name
+      cisco.ise.node_info:
+        ise_hostname: "{{ hostvars[ise_ppan_name].ansible_host }}" # PPAN!
+        ise_username: "{{ ise_username }}"
+        ise_password: "{{ ise_password }}"
+        ise_verify: "{{ ise_verify }}"
+        ise_debug: "{{ ise_debug }}"
+      register: node_info
+      until: node_info.ise_response | count == 1 # PPAN only!
+      delay: 10 # Default: 0. seconds to delay between retries
+      retries: 180
+      timeout: 1800 # retries * delay. Default: 300. Stop checking after <seconds>
+
+    # -------------------------------------------------------------------------
+    # Primary ⮕ Standalone: 🕑 10 minutes
+    # ⓘ The ISE Primary PAN must be alone to convert to Standalone!
+    # -------------------------------------------------------------------------
+    - name: Primary to Standalone | {{ inventory_hostname }} ({{ ansible_host }})
+      # when: inventory_hostname == ise_ppan_name
+      cisco.ise.node_primary_to_standalone:
+        ise_hostname: "{{ hostvars[ise_ppan_name].ansible_host }}"
+        ise_username: "{{ ise_username }}"
+        ise_password: "{{ ise_password }}"
+        ise_verify: "{{ ise_verify }}"
+        ise_debug: "{{ ise_debug }}"
+      delegate_to: localhost
+      register: primary_to_standalone
+      changed_when:
+        - primary_to_standalone is defined
+        - primary_to_standalone.ise_response is defined
+        - primary_to_standalone.ise_response.success is defined
+        - primary_to_standalone.ise_response.success.message is defined
+        - primary_to_standalone.ise_response.success.message is search("successfully")
+
+      # 🐞 `changed` should be true! 🐞
+      # Example output:
+      # ```
+      # primary_to_standalone:
+      #   changed: false
+      #   failed: false
+      #   ise_response:
+      #     success:
+      #       message: Node was updated successfully.In a few moments, the application server will be restarted.  The restart may take up to 10 minutes.
+      #     version: 1.0.0
+      #   result: ''
+      # ```
+
+    # - ansible.builtin.debug: var=primary_to_standalone
+
+    - name: Wait for ISE PPAN Restart
+      when: primary_to_standalone.changed
+      vars:
+        wait_hostname: "{{ inventory_hostname }}"
+        wait_host_ip: "{{ ansible_host }}"
+      ansible.builtin.include_role:
+        name: wait_for_ise_app_server_restart
+
+    # - name: Verify ISE Node is STANDALONE
+    #   when: not node_facts.is_stnd
+    #   delegate_to: localhost
+    #   cisco.ise.personas_check_standalone:
+    #     hostname: "{{ inventory_hostname }}"
+    #     username: "{{ ise_username }}"
+    #     password: "{{ ise_password }}"
+    #     ip: "{{ ansible_host }}"
+    #   register: standalone_state
+
+    # - ansible.builtin.debug: var=standalone_state
+
+- name: Veryify ISE nodes in STANDALONE state
+  hosts: localhost
+  gather_facts: no
+  vars_files: vars/main.yaml
+  roles:
+    - ise_facts_standalone
+    - ise_facts_table

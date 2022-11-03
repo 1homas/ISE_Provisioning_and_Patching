@@ -1,0 +1,265 @@
+---
+endpoint_groups:
+  #----------------------------------------------------------------------------
+  # Generic Groups
+  #----------------------------------------------------------------------------
+
+  - name: Allowed
+    description: Blocked
+
+  - name: Blocked
+    description: Blocked
+
+  - name: Assets
+    description: Assets
+
+  - name: IOT
+    description: IOT
+
+  #----------------------------------------------------------------------------
+  # Office Devices
+  #----------------------------------------------------------------------------
+
+  # - name: Computer
+  #   description: Computer
+
+  # - name: Mobile
+  #   description: Mobile
+
+  # - name: Desktops
+  #   description: Desktops
+
+  # - name: Laptops
+  #   description: Laptops
+
+  # - name: Smartphones
+  #   description: Smartphones
+
+  # - name: Tablets
+  #   description: Tablets
+
+  # - name: Servers
+  #   description: Servers
+
+  # - name: Workstations
+  #   description: Workstations
+
+  - name: Printers
+    description: Printers
+
+  - name: Signage
+    description: Signage
+
+  #----------------------------------------------------------------------------
+  # Networking Devices
+  #----------------------------------------------------------------------------
+
+  # - name: AP
+  #   description: Access Point
+
+  - name: Raspberry_Pi
+    description: Raspberry Pi
+
+  #----------------------------------------------------------------------------
+  # Computer Lab Devices
+  #----------------------------------------------------------------------------
+
+  # - name: Lab
+  #   description: Lab
+
+  # - name: Power
+  #   description: Power Supplies, Outlets, UPS, etc.
+
+  # - name: RFID
+  #   description: RFID Sensors
+
+  # - name: UPS
+  #   description: Uninterruptible Power Supply (UPS)
+
+  #----------------------------------------------------------------------------
+  # Communications
+  #----------------------------------------------------------------------------
+
+  # - name: Phones
+  #   description: Phones
+
+  # - name: Webex
+  #   description: Webex
+
+  #----------------------------------------------------------------------------
+  # Physical Security
+  #----------------------------------------------------------------------------
+
+  # - name: Badge_Readers
+  #   description: Badge Readers
+
+  - name: Cameras
+    description: Cameras
+
+  #----------------------------------------------------------------------------
+  # Building / Facilities
+  #----------------------------------------------------------------------------
+
+  - name: Facilities
+    description: Facilities IOT endpoints
+# - name: Lighting
+#   description: Lighting
+
+# - name: HVAC
+#   description: HVAC
+
+# - name: Thermostats
+#   description: Thermostats
+
+# - name: Elevators
+#   description: Elevators
+
+# - name: Pumps
+#   description: Pumps
+
+# - name: Vending
+#   description: Vending
+
+#----------------------------------------------------------------------------
+# Entertainment Devices
+#----------------------------------------------------------------------------
+
+# - name: Entertainment
+#   description: Entertainment
+
+# - name: Amazon_Echo
+#   description: AmazonTV
+
+# - name: Amazon_TV
+#   description: AmazonTV
+
+# - name: Amazon_FireStick
+#   description: AmazonTV
+
+# - name: Apple_TV
+#   description: Apple TV
+
+# - name: Apple_iPad
+#   description: Apple iPad
+
+# - name: Roku
+#   description: Roku
+
+# - name: TV
+#   description: Television (any manufacturer)
+
+#----------------------------------------------------------------------------
+# Vertical: Manufacturing
+#----------------------------------------------------------------------------
+
+# - name: Manufacturing
+#   description: Manufacturing
+
+#----------------------------------------------------------------------------
+# Vertical: Medical
+#----------------------------------------------------------------------------
+
+# - name: Medical
+#   description: Medical
+
+#----------------------------------------------------------------------------
+# Vertical: Retail
+#----------------------------------------------------------------------------
+
+# - name: PoS
+#   description: Point of Sale
+
+# - name: Register
+#   description: Scanner
+
+# - name: Scanner
+#   description: Scanner
+
+#----------------------------------------------------------------------------
+# Device Types from https://nmap.org/book/osdetect-device-types.html
+#----------------------------------------------------------------------------
+
+# - name: general_purpose
+#   description: This category contains general-purpose operating systems like Linux and Windows
+
+# - name: bridge
+#   description: A bridge combines two or more subnetworks into one
+
+# - name: broadband_router
+#   description: A router that connects a network to the Internet via cable, ADSL, fiber optics, etc.
+
+# - name: firewall
+#   description: A firewall controls what traffic is allowed into or out of a network
+
+# - name: game_console
+#   description: A video game console like the Xbox or PlayStation.
+
+# - name: hub
+#   description: A hub joins network segments by re-broadcasting all traffic
+
+# - name: load_balancer
+#   description: A device that distributes inbound traffic to multiple devices to ease the load on those devices
+
+# - name: media_device
+#   description: All kinds of audiovisual equipment: music players, audio systems, TVs, and projectors
+
+# - name: PBX
+#   description: A private branch exchange, or PBX, routes telephone calls within a private organization and connects them to the public telephone network or VoIP
+
+# - name: PDA
+#   description: A handheld computer
+
+# - name: phone
+#   description: A network-capable telephone that is not a VoIP phone
+
+# - name: power-device
+#   description: Miscellaneous power devices like uninterruptable power supplies and surge protectors
+
+# - name: printer
+#   description: Network-enabled printers, including printers with an embedded print server
+
+# - name: print_server
+#   description: A print server connects a printer to a network
+
+# - name: proxy_server
+#   description: Any kind of proxy
+
+# - name: remote_management
+#   description: Devices that allow servers or other equipment to be monitored or managed remotely
+
+# - name: router
+#   description: Routers connect multiple networks and route packets between different networks
+
+# - name: security-misc
+#   description: Any security device that doesn't fall into the “firewall” category belongs in this category
+
+# - name: specialized
+#   description: If a device doesn't fall into one of the other categories, it is specialized. Examples in this category are diverse and include such things as clocks, oscilloscopes, climate sensors, and more.
+
+# - name: storage-misc
+#   description: Data storage devices like tape decks and network-attached storage appliances.
+
+# - name: switch
+#   description: A device that extends a network by selectively re-broadcasting packets
+
+# - name: telecom-misc
+#   description: Devices used by telephone systems that aren't PBXs, like voicemail and ISDN systems.
+
+# - name: terminal
+#   description: A device with a keyboard and monitor that communicates with a terminal server or mainframe
+
+# - name: terminal_server
+#   description: A device providing terminal facilities to clients over a network.
+
+# - name: VoIP_Adapter
+#   description: A device that converts between voice over IP (VoIP) protocols and normal telephone traffic
+
+# - name: VoIP_Phone
+#   description: A phone capable of a VoIP protocol.
+
+# - name: WAP
+#   description: Wireless access points offer a wireless connection to a network
+
+# - name: webcam
+#   description: Any kind of camera that stores or transmits pictures or video
+

@@ -1,0 +1,32 @@
+---
+# tasks file for roles/aws_r53_dns_entry
+
+
+- name: Add Public DNS Entry
+  when: domain_name is defined
+  delegate_to: localhost
+  community.aws.route53:
+    state: "{{ dns_state | default('present')}}"
+    zone: "{{ zone }}"
+    record: "{{ record }}"
+    overwrite: "{{ overwrite }}"
+    private_zone: "{{ private_zone }}"
+    type: "{{ type }}"
+    ttl: "{{ ttl }}"
+    value: "{{ value }}"
+    # wait: no
+
+# - name: Add private DNS entry for the VM
+#   community.aws.route53:
+#     state: present
+#     zone: "{{ domain_name }}"
+#     record: "{{ item.name }}.{{ domain_name }}"
+#     overwrite: yes
+#     private_zone: yes
+#     type: A
+#     ttl: 7200
+#     value: "{{ hostvars[ inventory_hostname ].private_ip_address }}"
+#     # wait: no
+
+
+...

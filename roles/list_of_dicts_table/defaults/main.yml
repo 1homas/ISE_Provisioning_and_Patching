@@ -1,0 +1,5 @@
+---
+# defaults file for roles/list_of_dicts_table
+# table_head: [] # []  # attribute names
+# table_hide: []  # hide these attribute
+table_maxw: 40  # maximum width of any column

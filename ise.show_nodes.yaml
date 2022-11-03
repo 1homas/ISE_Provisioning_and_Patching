@@ -1,0 +1,28 @@
+---
+- name: Check Status of ISE Nodes
+  hosts: ise
+  gather_facts: no
+  vars_files: vars/main.yaml
+  roles:
+    - wait_for_ise_login
+    - ise_facts
+
+  tasks:
+    - name: Show ISE Facts
+      ansible.builtin.debug:
+        msg:
+          - "{{ ise_facts }}"
+          - "{{ ise_facts['ise'] }}"
+
+    - ansible.builtin.debug: var=group_names # List of groups the current host is a member
+    - ansible.builtin.debug: var=groups # Dict/map of all groups in inventory and hosts belonging to it
+    - ansible.builtin.debug: var=groups['ISE'] # undefined in dCloud
+    - ansible.builtin.debug: var=groups['ise'] # undefined in dCloud
+    - ansible.builtin.debug: var=hostvars[inventory_hostname]
+
+    #
+    # 💡 Update to be a pretty table
+    #
+    # | ISE Node Name | Init | ERS | OpenAPI | GUI | Role | Persona |
+    # | ise-ppan | ✅ | ✅ | ✅ | ✅ | Standalone | PAN,MNT,PSN
+    # | ise-span | ✅ | ✅ | ✅ | ✅ | Standalone | PAN,MNT,PSN

@@ -1,0 +1,12 @@
+---
+# tasks file for roles/ping
+
+- name: Ping | {{ inventory_hostname }}
+  ansible.builtin.ping:
+  register: result
+  until: result.failed == false
+  delay:   "{{ ping_delay }}"
+  retries: "{{ ping_retries }}"
+
+
+...

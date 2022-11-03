@@ -1,0 +1,84 @@
+---
+#
+# Run with `ansible-playbook playbook.yaml`
+#
+- name: Show Repository
+  hosts: localhost
+  gather_facts: no
+  vars_files: vars/main.yaml
+  vars:
+    ise_ppan_name: "{{ groups['role_PrimaryAdmin'] | first }}"
+    ansible_host: "{{ hostvars[ise_ppan_name].ansible_host }}"
+  tasks:
+    - name: Get Repository
+      cisco.ise.repository_info:
+        ise_hostname: "{{ ansible_host }}"
+        ise_username: "{{ ise_username }}"
+        ise_password: "{{ ise_password }}"
+        ise_verify: "{{ ise_verify }}"
+        ise_debug: "{{ ise_debug }}"
+      register: repositories
+
+    # - ansible.builtin.debug: var=repositories
+
+    # Example output:
+    # ```
+    # result:
+    #   changed: false
+    #   failed: false
+    #   ise_response:
+    #   - name: FTP_dCloud_Ubuntu
+    #     password: ''
+    #     path: /
+    #     protocol: FTP
+    #     serverName: 198.18.134.28
+    #     userName: ise
+    #   - name: LOCALDISK
+    #     path: /
+    #     protocol: DISK
+    # ```
+
+    # - name: List Repository Names
+    #   ansible.builtin.debug:
+    #     msg: "{{ repositories.ise_response | json_query('[].name') }}"
+
+    - name: Show Repositories
+      delegate_to: localhost
+      vars:
+        head: ['name','serverName','protocol','path']
+        rows: "{{ repositories.ise_response }}"
+        temp: "{{ lookup('template', 'list_of_dicts.j2') }}"
+      ansible.builtin.shell: "echo '{{ temp }}' > /dev/tty"
+
+    # - ansible.builtin.debug: var=result
+
+    - name: Get Repository Files
+      loop: "{{ repositories.ise_response }}"
+      cisco.ise.repository_files_info:
+        ise_hostname: "{{ ansible_host }}"
+        ise_username: "{{ ise_username }}"
+        ise_password: "{{ ise_password }}"
+        ise_verify: "{{ ise_verify }}"
+        ise_debug: "{{ ise_debug }}"
+        repositoryName: "{{ item.name }}"
+      register: repository_files_list
+    # - ansible.builtin.debug: var=repository_files_list
+
+    # Example output:
+    # ```
+    #   repository_files_list:
+    #     changed: false
+    #     failed: false
+    #     ise_response:
+    #     - css
+    #     - img
+    #     - index.html
+    #     - ise-apply-CSCwa47133_3.1.0.518_patch1-SPA.tar.gz
+    #     - ise-patchbundle-3.1.0.518-Patch3-22042809.SPA.x86_64.tar.gz
+    #     - my_first_backup-CFG10-220816-1332.tar.gpg
+    # ```
+
+    - name: All Files
+      loop: "{{ repository_files_list.results }}"
+      ansible.builtin.debug:
+        msg: "{{ item.item.name }}:\n{{ item.ise_response | to_nice_yaml(indent=2) }}"

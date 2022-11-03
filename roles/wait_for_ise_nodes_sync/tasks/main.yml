@@ -1,0 +1,18 @@
+---
+# tasks file for roles/wait_for_ise_nodes_sync
+- name: Get ISE PPAN Name in Inventory
+  ansible.builtin.set_fact:
+    ise_ppan_name: "{{ groups['role_PrimaryAdmin'] | first }}"
+
+- name: Wait for ISE Node Synchronization
+  cisco.ise.node_deployment_info:
+    ise_hostname: "{{ hostvars[ise_ppan_name].ansible_host }}" # PPAN!
+    ise_username: "{{ ise_username }}"
+    ise_password: "{{ ise_password }}"
+    ise_verify: "{{ ise_verify }}"
+    ise_debug: "{{ ise_debug }}"
+  register: node_deployment_info
+  until: node_deployment_info.ise_response | selectattr('nodeStatus', '!=', 'Connected') | count == 0
+  delay: 30 # Default: 0. Seconds to delay between retries
+  retries: 120
+  timeout: 3600 # retries * delay. Default: 300. Stop checking after <seconds>

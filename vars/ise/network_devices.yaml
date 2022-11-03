@@ -1,0 +1,34 @@
+---
+profileName: Cisco
+network_devices:
+
+  #
+  # 🐞 Cannot enable the DefaultNetworkDevice via API
+  #    Validation Error: Mandatory fields missing:
+  #      [NetworkDeviceIPList: NetworkDeviceIP]
+  #
+  # - name: DefaultNetworkDevice
+  #   description: Default Network Device
+  #   state: present
+  #   # authenticationSettings:
+  #   networkProtocol: RADIUS
+  #   radiusSharedSecret: ISEisC00L
+  #   NetworkDeviceIPList: []
+  #   NetworkDeviceGroupList: []
+  #   coaPort: 0
+  #   modelName: Unknown
+  #   profileName: Cisco
+  #   softwareVersion: Unknown
+
+  - name: my_test_nad
+    description: My Test NAD
+    state: present
+    NetworkDeviceIPList:
+      - ipaddress: 10.80.60.148
+        mask: 32
+    NetworkDeviceGroupList:
+      - Device Type#All Device Type
+      - Location#All Locations#AMER#HBC
+    # radiusSharedSecret: "{{ ise_radius_secret}}" # RADIUS
+    # sharedSecret: "{{ ise_tacacs_secret }}" # TACACS
+

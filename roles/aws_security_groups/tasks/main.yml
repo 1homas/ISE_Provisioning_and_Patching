@@ -1,0 +1,75 @@
+---
+# tasks file for roles/aws_security_groups
+
+- name: SG_Public Security Group
+  amazon.aws.ec2_group:
+    vpc_id: "{{ vpc.vpc.id }}"
+    # region: "{{ vpc_region }}"
+    name: SG_Public
+    description: Public Access Security Group
+    rules:
+      - rule_desc: ICMP
+        proto: icmp
+        from_port: -1
+        to_port: -1
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 0
+        to_port: 65535
+        cidr_ip: 0.0.0.0/0
+        rule_desc: Allow everything TCP
+      - proto: udp
+        from_port: 0
+        to_port: 65535
+        cidr_ip: 0.0.0.0/0
+        rule_desc: Allow everything UDP
+    # rules_egress:
+    #   - proto: any
+    #     cidr_ip: 0.0.0.0/0    # any
+    #     rule_desc: Any
+    tags:
+      Name: SG_Public
+      project: "{{ project_name | default('') }}"
+      environment: demo # [Prod, Dev, QA, Stage, Test]
+      started: "{{ '%Y-%m-%dT%H:%M:%S-%Z' | strftime }}"
+      owner: "{{ owner }}"
+  register: result
+
+- name: Create Security Group SG_ICMP_SSH_WWW
+  amazon.aws.ec2_group:
+    name: SG_ICMP_SSH_WWW
+    description: Allow Ping and SSH to Linux VM
+    vpc_id: "{{ vpc.vpc.id }}"
+    # region: "{{ aws_region }}"
+    rules:
+      - rule_desc: ICMP
+        proto: icmp
+        from_port: -1
+        to_port: -1
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: Allow ICMP Ping
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: Allow SSH
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: Allow HTTP
+      - proto: tcp
+        from_port: 443
+        to_port: 443
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: Allow HTTPS
+    rules_egress:
+      - proto: all
+        cidr_ip: 0.0.0.0/0 # any
+    tags:
+      Name: SG_ICMP_SSH_WWW
+      project: "{{ project_name }}"
+      started: "{{ '%Y-%m-%dT%H:%M:%S-%Z' | strftime }}"
+  register: SG_ICMP_SSH_WWW
+# - name: Show SG_ICMP_SSH_WWW
+#   ansible.builtin.debug: var=SG_ICMP_SSH_WWW

@@ -1,0 +1,55 @@
+---
+# tasks file for roles/ise_cli_password_reset
+
+#------------------------------------------------------------------------------
+# 💡 ISE 3.2+ cloud instances use the superadmin account `iseadmin`
+#    Restoring to/from cloud instances to/from a VM or appliance will require
+#    an admin password change!
+#
+# 💡 ISE Application Server must be running to reset password!
+#
+# 💡 Possible errors:
+#    - Cannot reuse password within {{n}} days.
+#
+# Example command output:
+#
+# ```
+# ise/admin#application reset-passwd ise admin
+# Enter new password:
+# Confirm new password:
+#
+# Password reset successfully.
+#
+# ise/admin#
+# ```
+#------------------------------------------------------------------------------
+
+- name: Password Reset | {{ username }}@{{ inventory_hostname }}
+  vars:
+    ansible_command_timeout: 60
+  ansible.netcommon.cli_command:
+    command: "application reset-passwd ise {{ username }}"
+    check_all: yes
+    # sendonly: no
+    # newline: yes
+    prompt:
+      - "Enter new password:"
+      - "Confirm new password:"
+    answer:
+      - "{{ password }}\r"
+      - "{{ password }}\r"
+  register: output
+  failed_when: "'successfully' not in output.stdout"
+
+- name: output.stdout
+  when:
+    - output is defined
+    - output.stdout is defined
+  ansible.builtin.debug:
+    var: output.stdout
+    # verbosity: 3
+
+- name: Exit | {{ inventory_hostname }}
+  when: username == "admin"
+  ansible.netcommon.cli_command:
+    command: "exit"

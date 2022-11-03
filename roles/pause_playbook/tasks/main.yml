@@ -1,0 +1,19 @@
+---
+# tasks file for pause_playbook
+#
+# 💡 Blank lines (ASCII whitespace) in the pause prompt is trimmed by Ansible!
+#    To maintain the empty line spacing in the prompt below, each of the lines
+#    begins with a Unicode U+2003 Em Space [ ]!
+#
+
+  - name: Wait {{ seconds }} seconds...
+    ansible.builtin.pause:
+      prompt: |
+         
+          █  █
+          █  █  Pausing Playbook for {{ seconds }} seconds ...
+          █  █
+         
+      seconds: "{{ seconds }}"
+
+...

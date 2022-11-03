@@ -1,0 +1,110 @@
+---
+# tasks file for roles/ise_backup_completed
+
+- name: ISE Backup In Progress | {{ inventory_hostname }} ({{ ansible_host }})
+  cisco.ise.backup_last_status_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username }}"
+    ise_password: "{{ ise_password }}"
+    ise_verify: "{{ ise_verify }}"
+    ise_debug: "{{ ise_debug }}"
+  register: backup_status
+  until: backup_status.ise_response.status != 'IN_PROGRESS'
+  retries: "{{ backup_retries }}"
+  delay: "{{ backup_delay }}" # seconds to wait between retries
+  failed_when: backup_status.ise_response.justComplete != 'yes'
+
+  #----------------------------------------------------------------------------
+  # Example Status Results
+  #----------------------------------------------------------------------------
+  # ```
+  # backup_status:
+  #   ise_response:
+  #     action: BACKUP
+  #     details: Starting Backup
+  #     error: 'false'
+  #     hostName: ise.securitydemo.net
+  #     initiatedFrom: OPEN_API
+  #     justComplete: 'no'
+  #     message: Backup is in progress...
+  #     name: 20220911-212308
+  #     percentComplete: '10'
+  #     repository: FTP_dCloud_Ubuntu
+  #     scheduled: 'no'
+  #     startDate: Mon Sep 12 04:23:11 UTC 2022
+  #     status: IN_PROGRESS
+  #     type: CONFIGURATION_DB
+  #
+  # backup_status:
+  #   ise_response:
+  #     action: BACKUP
+  #     details: Backing up ISE Configuration Data
+  #     error: 'false'
+  #     hostName: ise.securitydemo.net
+  #     initiatedFrom: OPEN_API
+  #     justComplete: 'no'
+  #     message: Backup is in progress...
+  #     name: 20220911-212308
+  #     percentComplete: '20'
+  #     repository: FTP_dCloud_Ubuntu
+  #     scheduled: 'no'
+  #     startDate: Mon Sep 12 04:23:11 UTC 2022
+  #     status: IN_PROGRESS
+  #     type: CONFIGURATION_DB
+  #
+  # backup_status:
+  #   ise_response:
+  #     action: BACKUP
+  #     details: Backing up ISE Indexing Engine Data
+  #     error: 'false'
+  #     hostName: ise.securitydemo.net
+  #     initiatedFrom: OPEN_API
+  #     justComplete: 'no'
+  #     message: Backup is in progress...
+  #     name: 20220911-212308
+  #     percentComplete: '45'
+  #     repository: FTP_dCloud_Ubuntu
+  #     scheduled: 'no'
+  #     startDate: Mon Sep 12 04:23:11 UTC 2022
+  #     status: IN_PROGRESS
+  #     type: CONFIGURATION_DB
+  #
+  # backup_status:
+  #   ise_response:
+  #     action: BACKUP
+  #     details: null
+  #     error: 'false'
+  #     hostName: ise.securitydemo.net
+  #     initiatedFrom: OPEN_API
+  #     justComplete: 'yes'
+  #     message: 'backup 20220911-212308-CFG10-220912-0423.tar.gpg to repository FTP_dCloud_Ubuntu: success'
+  #     name: 20220911-212308
+  #     percentComplete: null
+  #     repository: FTP_dCloud_Ubuntu
+  #     scheduled: 'no'
+  #     startDate: Mon Sep 12 04:23:11 UTC 2022
+  #     status: COMPLETED
+  #     type: CONFIGURATION_DB
+  # ```
+
+- name: Backup Completed | {{ inventory_hostname }} ({{ ansible_host }})
+  when: backup_status.ise_response.status == 'COMPLETED'
+  vars:
+    line1: "{{ inventory_hostname }} ({{ ansible_host }})"
+    line2: "{{ backup_status.ise_response.repository }}"
+    line3: "{{ backup_status.ise_response.type }}"
+    line4: "{{ backup_status.ise_response.message }}"
+    ok: |
+       
+            _
+           ( |
+         ___\ \
+        (__()  `-|  {{ line1 }}
+        (___()   |  {{ line2 }}
+        (__()    |  {{ line3 }}
+        (_()__.--|  {{ line4 }}
+       
+       
+       
+       
+  ansible.builtin.shell: "echo '{{ ok }}' > /dev/tty"

@@ -1,0 +1,19 @@
+---
+# ⚠ Do not loop over multiple repositories!
+#   🔓 Ansible will show the repository password in the terminal!
+- name: Create Repository | {{ repo_name }} @ {{ inventory_hostname }} ({{ ansible_host }})
+  cisco.ise.repository:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username }}"
+    ise_password: "{{ ise_password }}"
+    ise_verify: "{{ ise_verify }}"
+    ise_debug: "{{ ise_debug }}"
+    state: "{{ repo_state }}"
+    protocol: "{{repo_protocol | upper }}" # CDROM|DISK|FTP|SFTP|HTTP|HTTPS|NFS|TFTP
+    name: "{{ repo_name }}"
+    serverName: "{{ repo_server }}"
+    path: "{{ repo_path }}"
+    userName: "{{ repo_username | default( omit ) }}" # alphanumeric and _-./@\$ characters
+    password: "{{ repo_password | default( omit ) }}" # alphanumeric and/or special characters
+    enablePki: "{{ repo_enablePki }}"
+  register: repository

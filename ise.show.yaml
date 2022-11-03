@@ -1,0 +1,22 @@
+---
+- name: ISE Show
+  hosts: ise_nodes
+  gather_facts: no
+  vars_files: vars/main.yaml
+  # environment:
+  #   ISE_DEBUG: True
+
+  roles:
+    - ise_env_ansible_valid
+    - ise_show
+  # - ise_show_certificates
+  # - ise_show_endpoint_groups
+  # - ise_show_na_policy_sets
+  # - ise_show_nodes
+  # - ise_show_portals
+  # - ise_show_portals_status
+  # - ise_show_repository
+  # - ise_show_sgts
+  # - ise_show_version
+  # - ise_show_certs_expired
+  # - ise_show_port_status

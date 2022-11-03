@@ -1,0 +1,49 @@
+---
+- name: SG_ISE_Basic Security Group
+  amazon.aws.ec2_group:
+    vpc_id: "{{ vpc.vpc.id }}"
+    # region: "{{ vpc_region }}"
+    state: present
+    name: SG_ISE_Basic
+    description: SG_ISE_Basic
+    rules:
+      - rule_desc: ICMP
+        proto: icmp
+        from_port: -1
+        to_port: -1
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: HTTP
+      - proto: tcp
+        from_port: 443
+        to_port: 443
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: HTTPS
+      - proto: udp
+        from_port: 1812
+        to_port: 1813
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: RADIUS Auth & Acct
+      - proto: udp
+        from_port: 1645
+        to_port: 1646
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: RADIUS Auth & Acct (Old!)
+      - proto: tcp
+        from_port: 9060
+        to_port: 9060
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: ERS API
+    # rules_egress:
+    #   - proto: any
+    #     cidr_ip: 0.0.0.0/0    # any
+    #     rule_desc: Any
+    tags:
+      Name: SG_ISE_Basic
+      project: "{{ project_name }}"
+      started: "{{ '%Y-%m-%dT%H:%M:%S-%Z' | strftime }}"
+  register: result
+# - ansible.builtin.debug: var=result

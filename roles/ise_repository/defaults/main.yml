@@ -1,0 +1,8 @@
+---
+# defaults file for roles/template
+repo_state: present
+repo_protocol: DISK # CDROM|DISK|FTP|SFTP|HTTP|HTTPS|NFS|TFTP
+repo_name: LOCALDISK
+repo_server: localhost
+repo_path: "/"
+repo_enablePki: false

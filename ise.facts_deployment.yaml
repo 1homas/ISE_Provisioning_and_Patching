@@ -1,0 +1,17 @@
+---
+- name: ISE Facts from PPAN for a Deployment
+  hosts: localhost
+  gather_facts: no
+  vars_files: vars/main.yaml
+  tasks:
+
+    - name: ISE Facts from Deployment
+      ansible.builtin.include_role:
+        name: ise_facts
+
+    - name: Show ise_facts
+      ansible.builtin.debug: var=ise_facts
+
+    - name: ISE Facts Show
+      ansible.builtin.include_role:
+        name: ise_facts_table

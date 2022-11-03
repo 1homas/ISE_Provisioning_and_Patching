@@ -1,0 +1,30 @@
+---
+- name: SG_SSH_ICMP Security Group
+  amazon.aws.ec2_group:
+    vpc_id: "{{ vpc.vpc.id }}"
+    # region: "{{ vpc_region }}"
+    state: present
+    name: SG_SSH_ICMP
+    description: SG_SSH_ICMP
+    rules:
+      - rule_desc: ICMP
+        proto: icmp
+        from_port: -1
+        to_port: -1
+        cidr_ip: 0.0.0.0/0
+      - rule_desc: SSH
+        proto: tcp
+        to_port: 22
+        from_port: 22
+        cidr_ip: 0.0.0.0/0 # any
+    # rules_egress:
+    #   - proto: any
+    #     cidr_ip: 0.0.0.0/0    # any
+    #     rule_desc: Any
+    tags:
+      Name: SG_SSH_ICMP
+      project: "{{ project_name }}"
+      started: "{{ '%Y-%m-%dT%H:%M:%S-%Z' | strftime }}"
+  register: result
+# - ansible.builtin.debug: var=result
+

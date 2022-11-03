@@ -1,0 +1,20 @@
+---
+# handlers file for roles/ise_backup_now
+
+  - name: Check Backup Status
+    cisco.ise.backup_last_status_info:
+      ise_hostname: "{{ ansible_host }}"
+      ise_username: "{{ ise_username }}"
+      ise_password: "{{ ise_password }}"
+      ise_verify:   "{{ ise_verify }}"
+      ise_debug:    "{{ ise_debug }}"
+    register: backup_status
+    # until: backup_status.ise_response.justComplete == 'yes'
+    # retries: 360    # 360 * 10 = 3600 seconds == 1 hour
+    # delay: 10       # Default: 0. Seconds to wait before first check
+
+  - name: Show Backup Status
+    ansible.builtin.debug:
+      msg: "{{ backup_status.ise_response.percentComplete }} | {{ backup_status.ise_response.status }}"
+
+...

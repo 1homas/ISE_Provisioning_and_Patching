@@ -1,0 +1,210 @@
+---
+# tasks file for roles/ansible_special_variables
+
+  - ansible.builtin.debug: var=ise
+  - ansible.builtin.debug: var=ise_facts
+
+  - ansible.builtin.debug: var=ansible_host
+  - ansible.builtin.debug: var=ansible_user
+  - ansible.builtin.debug: var=ansible_password
+
+  - ansible.builtin.debug: var=ise_hostname
+  - ansible.builtin.debug: var=ise_username
+  - ansible.builtin.debug: var=ise_password
+  - ansible.builtin.debug: var=ise_verify
+  - ansible.builtin.debug: var=ise_debug
+
+  - ansible.builtin.debug: var=inventory_hostname
+  - ansible.builtin.debug: var=group_names
+
+  #
+  # Magic variables
+  # These variables cannot be set directly by the user;
+  # Ansible will always override them to reflect internal state.
+  #
+
+  # Boolean that indicates if we are in check mode or not
+  - ansible.builtin.debug: var=ansible_check_mode
+
+  # The full path of used Ansible configuration file
+  - ansible.builtin.debug: var=ansible_config_file
+
+  # The names of the roles currently imported into the current play as dependencies of other plays
+  - ansible.builtin.debug: var=ansible_dependent_role_names
+
+  # indicates if we are in diff mode or not
+  - ansible.builtin.debug: var=ansible_diff_mode
+
+  # Integer reflecting the number of maximum forks available to this run
+  - ansible.builtin.debug: var=ansible_forks
+
+  # List of sources used as inventory
+  - ansible.builtin.debug: var=ansible_inventory_sources
+
+  # Contents of the --limit CLI option for the current execution of Ansible
+  - ansible.builtin.debug: var=ansible_limit
+
+  # A dictionary/map containing extended loop information when enabled via loop_control.extended
+  - ansible.builtin.debug: var=ansible_loop
+
+  # The name of the value provided to loop_control.loop_var. Added in 2.8
+  - ansible.builtin.debug: var=ansible_loop_var
+
+  # The name of the value provided to loop_control.index_var. Added in 2.9
+  - ansible.builtin.debug: var=ansible_index_var
+
+  # When the current role is being executed by means of an include_role or
+  # import_role action, this variable contains a list of all parent roles,
+  # with the most recent role (in other words, the role that included/imported
+  # this role) being the first item in the list. When multiple inclusions
+  # occur, this list lists the last role (in other words, the role that
+  # included this role) as the first item in the list. It is also possible
+  # that a specific role exists more than once in this list.
+  # For example: When role A includes role B, inside role B,
+  # ansible_parent_role_names will equal to ['A']. If role B then includes
+  # role C, the list becomes ['B', 'A'].
+  - ansible.builtin.debug: var=ansible_parent_role_names
+
+  # When the current role is being executed by means of an include_role or
+  # import_role action, this variable contains a list of all parent roles,
+  # with the most recent role (in other words, the role that included/imported
+  # this role) being the first item in the list. Please refer to
+  # ansible_parent_role_names for the order of items in this list.
+  - ansible.builtin.debug: var=ansible_parent_role_paths
+
+  # List of active hosts in the current play run limited by the serial,
+  # aka ‘batch’. Failed/Unreachable hosts are not considered ‘active’.
+  - ansible.builtin.debug: var=ansible_play_batch
+
+  # List of hosts in the current play run, not limited by the serial.
+  # Failed/Unreachable hosts are excluded from this list.
+  - ansible.builtin.debug: var=ansible_play_hosts
+
+  # List of all the hosts that were targeted by the play
+  - ansible.builtin.debug: var=ansible_play_hosts_all
+
+  # The names of the roles currently imported into the current play.
+  # This list does not contain the role names that are implicitly included via dependencies.
+  - ansible.builtin.debug: var=ansible_play_role_names
+
+  # The path to the python interpreter being used by Ansible on the controller
+  - ansible.builtin.debug: var=ansible_playbook_python
+
+  # The names of the roles currently imported into the current play, or roles
+  # referenced as dependencies of the roles imported into the current play.
+  - ansible.builtin.debug: var=ansible_role_names
+
+  # The fully qualified collection role name, in the format of namespace.collection.role_name
+  - ansible.builtin.debug: var=ansible_role_name
+
+  # The name of the collection the task that is executing in.
+  # In the format of namespace.collection
+  - ansible.builtin.debug: var=ansible_collection_name
+
+  # Contents of the --tags CLI option, which specifies which tags will be
+  # included for the current run. Note that if --tags is not passed,
+  # this variable will default to ["all"].
+  - ansible.builtin.debug: var=ansible_run_tags
+
+  # Current search path for action plugins and lookups, in other words,
+  # where we search for relative paths when you do template: src=myfile
+  - ansible.builtin.debug: var=ansible_search_path
+
+  # Contents of the --skip-tags CLI option, which specifies which tags will be skipped for the current run.
+  - ansible.builtin.debug: var=ansible_skip_tags
+
+  # Current verbosity setting for Ansible
+  - ansible.builtin.debug: var=ansible_verbosity
+
+  # Dictionary/map that contains information about the current running version
+  # of ansible, it has the following keys:
+  #   full, major, minor, revision and string.
+  - ansible.builtin.debug: var=ansible_version
+
+  # List of groups the current host is part of
+  - ansible.builtin.debug: var=groups
+
+  # A dictionary/map with all the groups in inventory and each group has the list of hosts that belong to it
+  - ansible.builtin.debug: var=group_names
+
+  # A dictionary/map with all the hosts in inventory and variables assigned to them
+  # - ansible.builtin.debug: var=hostvars
+
+  # The inventory name for the ‘current’ host being iterated over in the play
+  - ansible.builtin.debug: var=inventory_hostname
+
+  # The short version of inventory_hostname
+  - ansible.builtin.debug: var=inventory_hostname_short
+
+  # The directory of the inventory source in which the inventory_hostname was first defined
+  - ansible.builtin.debug: var=inventory_dir
+
+  # The file name of the inventory source in which the inventory_hostname was first defined
+  - ansible.builtin.debug: var=inventory_file
+
+  # Special variable that allows you to ‘omit’ an option in a task.
+  # For example:
+  #   - user: name=bob home={{ bobs_home|default(omit) }}
+  - ansible.builtin.debug: var=omit
+
+  # Deprecated, the same as ansible_play_batch
+  - ansible.builtin.debug: var=play_hosts
+
+  # The name of the currently executed play. Added in 2.8.
+  # (name attribute of the play, not file name of the playbook.)
+  - ansible.builtin.debug: var=ansible_play_name
+
+  # The path to the directory of the playbook in the ansible-playbook command line.
+  - ansible.builtin.debug: var=playbook_dir
+
+  # The name of the role currently being executed.
+  - ansible.builtin.debug: var=role_name
+
+  # Deprecated, the same as ansible_play_role_names
+  - ansible.builtin.debug: var=role_names
+
+  # The path to the dir of the currently running role
+  - ansible.builtin.debug: var=role_path
+
+
+  #
+  # Facts
+  #
+  # These are variables that contain information pertinent to the current host (inventory_hostname).
+  # They are only available if gathered first.
+  # See https://docs.ansible.com/ansible/latest/user_guide/playbooks_vars_facts.html for more information.
+  #
+
+  # Contains any facts gathered or cached for the inventory_hostname Facts are normally gathered by the setup module automatically in a play, but any module can return facts.
+  # - ansible.builtin.debug: var=ansible_facts
+
+  # Contains any ‘local facts’ gathered or cached for the inventory_hostname.
+  # The keys available depend on the custom facts created.
+  # See the setup module and facts.d or local facts for more details.
+  - ansible.builtin.debug: var=ansible_local
+
+  #
+  # Connection variables
+  # Used to set the specifics on how to execute actions on a target.
+  # Most correspond to connection plugins, but other plugins like shell, terminal and become are normally involved.
+  # Only the common ones are described as each connection/become/shell/etc plugin can define its own overrides and specific variables.
+  # See https://docs.ansible.com/ansible/devel/reference_appendices/general_precedence.html
+  #
+
+  # The user Ansible ‘becomes’ after using privilege escalation. This must be available to the ‘login user’.
+  - ansible.builtin.debug: var=ansible_become_user
+
+  # The connection plugin actually used for the task on the target host.
+  - ansible.builtin.debug: var=ansible_connection
+
+  # The ip/name of the target host to use instead of inventory_hostname.
+  - ansible.builtin.debug: var=ansible_host
+
+  # The path to the Python executable Ansible should use on the target host.
+  - ansible.builtin.debug: var=ansible_python_interpreter
+
+  # The user Ansible ‘logs in’ as.
+  - ansible.builtin.debug: var=ansible_user
+
+
+...

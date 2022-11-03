@@ -1,0 +1,38 @@
+---
+# tasks file for roles/wait_for_ise_app_server_restart
+
+- name: ISE Application Server ⬇
+  delegate_to: localhost
+  ansible.builtin.wait_for:
+    host: "{{ wait_host_ip }}"
+    port: 443 # SSH/REST/API Gateway
+    state: stopped # Port is CLOSED
+    delay: "{{ wait_delay }}"
+    sleep: "{{ wait_sleep }}"
+    timeout: "{{ wait_timeout }}"
+  ignore_errors: yes # Errors do not stop execution
+
+- name: ISE Application Server ⬆
+  delegate_to: localhost
+  ansible.builtin.wait_for:
+    host: "{{ wait_host_ip }}"
+    port: 443 # SSH/REST/API Gateway
+    state: started
+    delay: "{{ wait_delay }}"
+    sleep: "{{ wait_sleep }}"
+    timeout: "{{ wait_timeout }}"
+  ignore_errors: yes # Errors do not stop execution
+
+- name: ISE Login ⮕
+  delegate_to: localhost
+  ansible.builtin.uri:
+    url: https://{{ wait_host_ip }}/admin/login.jsp
+    method: GET
+    follow_redirects: safe
+    timeout: "{{ wait_uri_timeout }}"
+    validate_certs: "{{ wait_validate_certs }}"
+    return_content: no
+  register: result
+  until: result.status == 200
+  retries: "{{ wait_retries }}"
+  delay: "{{ wait_sleep }}" # wait between checks

@@ -1,0 +1,39 @@
+---
+- name: Check if all nodes are in STANDALONE state
+  hosts: ise
+  gather_facts: no
+  vars_files:
+    - vars/main.yaml
+  tasks:
+    # - ansible.builtin.debug: var=hostvars[inventory_hostname]
+    # - ansible.builtin.debug: var=ise_hostname
+    # - ansible.builtin.debug: var=ise_username
+    # - ansible.builtin.debug: var=ise_password
+    # - ansible.builtin.debug: var=ise_verify
+    # - ansible.builtin.debug: var=ise_debug
+
+    # - name: Get Nodes in Deployment
+    #   delegate_to: localhost
+    #   cisco.ise.node_deployment_info:
+    #     ise_hostname: "{{ inventory_hostname }}"
+    #     ise_username: "{{ ise_username }}"
+    #     ise_password: "{{ ise_password }}"
+    #     ise_verify:   "{{ ise_verify }}"
+    #     ise_debug:    "{{ ise_debug }}"
+    #   register: result
+
+    # - ansible.builtin.debug: var=result
+    # - ansible.builtin.debug: var=inventory_hostname
+    # - ansible.builtin.debug: var=hostvars[inventory_hostname].public_ip_address
+    # - ansible.builtin.debug: var=hostvars[inventory_hostname]['tags'].hostname
+
+    - name: Check if all nodes are in STANDALONE state
+      delegate_to: localhost
+      cisco.ise.personas_check_standalone:
+        hostname: "{{ hostvars[inventory_hostname]['tags'].hostname }}"
+        ip: "{{ hostvars[inventory_hostname].public_ip_address }}"
+        username: "{{ ise_username }}"
+        password: "{{ ise_password }}"
+      register: result
+
+    - ansible.builtin.debug: var=result

@@ -1,0 +1,5 @@
+---
+# defaults file for roles/ise_env_ansible_valid
+cache_file: "./.ise_env_ansible_valid"
+cache_time: 3600 # seconds. Default 3600 (1 hours)
+cisco_ise_package_minimum: 2.5.4

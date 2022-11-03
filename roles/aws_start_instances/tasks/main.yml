@@ -1,0 +1,25 @@
+---
+# tasks file for roles/aws_start_instances
+
+- name: Get All Stopped EC2 Instances | 'project:{{ project_name }}'
+  community.aws.ec2_instance_info: # get all by default
+    filters:
+      instance-state-name: stopped
+      "tag:project": "{{ project_name }}"
+  register: ec2_instances
+
+- ansible.builtin.debug: var=ec2_instances
+
+- name: Start Instances | 'project:{{ project_name }}'
+  when: ec2_instances is defined and ec2_instances.instances | length > 0
+  amazon.aws.ec2_instance:
+    # state: present  # ec2_instances exist but not guarantee of state (e.g. running)
+    state: running # present + ensures the ec2_instances are running
+    # state: started  # running + waits for EC2 status checks to report OK if wait=true
+    filters:
+      instance-state-name: stopped
+      "tag:project": "{{ project_name }}"
+    wait: yes # wait to get the new public IP address
+  register: ec2_instances_running
+
+- ansible.builtin.debug: var=ec2_instances_running

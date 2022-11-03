@@ -1,0 +1,43 @@
+---
+# tasks file for roles/ise_node_deployment
+
+#
+# Ⰹ ISE REST API: POST /api/v1/deployment/node/
+# Registers a Cisco ISE node to form a multi-node deployment.
+# Approximate execution time - 300 seconds.
+#
+# Roles:
+# - Standalone
+# - PrimaryAdmin
+# - PrimaryMonitoring
+# - SecondaryAdmin
+# - SecondaryMonitoring
+# - PrimaryDedicatedMonitoring
+# - SecondaryDedicatedMonitoring
+# Services:
+# - DeviceAdmin
+# - Profiler
+# - Session
+# - pxGrid
+# - pxGridCloud
+# - PassiveIdentity
+# - SXP
+# - TC-NAC
+#
+- name: Add ISE Node to the Deployment | {{ item }}
+  cisco.ise.node_deployment:
+    ise_hostname: "{{ hostvars[ise_ppan_name].ansible_host }}" # ISE PAN
+    ise_username: "{{ ise_username }}"
+    ise_password: "{{ ise_password }}"
+    ise_verify: "{{ ise_verify }}"
+    ise_debug: "{{ ise_debug }}"
+    state: present
+    userName: "{{ ise_username }}"
+    password: "{{ ise_password }}"
+    hostname: "{{ item }}"
+    fqdn: "{{ item }}.{{ domain_name }}"
+    allowCertImport: true
+    roles: "{{ hostvars[item].tags.roles }}"
+    services: "{{ hostvars[item].tags.services }}"
+  register: node_registration
+# - ansible.builtin.debug: var=node_registration

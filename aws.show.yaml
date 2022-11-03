@@ -1,0 +1,13 @@
+---
+#------------------------------------------------------------------------------
+# Invoke with tag names to only get what you need:
+#
+# ansible-playbook aws.show.yaml --tags vpc,sg
+#------------------------------------------------------------------------------
+
+- name: Show AWS Info Playbook
+  gather_facts: no
+  hosts: localhost
+  vars_files: vars/main.yaml
+  roles:
+    - aws_show

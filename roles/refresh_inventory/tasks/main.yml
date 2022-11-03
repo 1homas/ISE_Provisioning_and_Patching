@@ -1,0 +1,9 @@
+---
+# tasks file for roles/refresh_inventory
+
+
+  - name: Refresh inventory to ensure new instances exist in inventory
+    ansible.builtin.meta: refresh_inventory
+
+
+...

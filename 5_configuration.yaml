@@ -1,0 +1,225 @@
+---
+- name: ISE Configuration
+  hosts: localhost
+  gather_facts: no
+  vars_files: vars/main.yaml
+  vars:
+    ise_ppan_name: "{{ groups['role_PrimaryAdmin'] | first }}"
+    ansible_host: "{{ hostvars[ise_ppan_name].ansible_host }}"
+  tasks:
+    # - name: Include repositories
+    #   ansible.builtin.include_vars: vars/ise/repositories.yaml
+    #   tags: [ repository, repositories ]
+
+    # - name: Create Repositories
+    #   when:
+    #     - repositories is defined
+    #     - repositories | count > 0
+    #   loop: "{{ repositories }}"
+    #   delegate_to: localhost
+    #   cisco.ise.repository:
+    #     ise_hostname: "{{ ansible_host }}"
+    #     ise_username: "{{ ise_username }}"
+    #     ise_password: "{{ ise_password }}"
+    #     ise_verify: "{{ ise_verify   }}"
+    #     ise_debug: "{{ ise_debug    }}"
+    #     state: "{{ item.state | default('present') }}"
+    #     name: "{{ item.name }}"
+    #     serverName: "{{ item.serverName }}"
+    #     protocol: "{{ item.protocol }}" # CDROM|DISK|FTP|SFTP|HTTP|HTTPS|NFS|TFTP
+    #     path: "{{ item.path | default('/') }}"
+    #     userName: "{{ item.userName | default('') }}"
+    #     password: "{{ item.password | default('') }}"
+    #     enablePki: "{{ item.enablePki | default(false) }}"
+    #   tags: [ repository, repositories ]
+
+    - name: Include Identity Groups
+      ansible.builtin.include_vars: vars/ise/identity_groups.yaml
+      tags: [ identity_group, identity_groups ]
+
+    - name: Create ISE Identity Group
+      when:
+        - identity_groups is defined
+        - identity_groups | count > 0
+      delegate_to: localhost
+      vars:
+        # default_identity_groups: a1740510-8c01-11e6-996c-525400b48521  # Employee
+        # default_identity_group_parent: NAC Group:NAC:IdentityGroups:User Identity Groups
+      loop: "{{ identity_groups }}"
+      cisco.ise.identity_group:
+        ise_hostname: "{{ ansible_host }}"
+        ise_username: "{{ ise_username }}"
+        ise_password: "{{ ise_password }}"
+        ise_verify:   "{{ ise_verify }}"
+        ise_debug:    "{{ ise_debug }}"
+        state:  "{{ item.state | default('present') }}"
+        name:   "{{ item.name }}"
+        parent: "{{ item.parent | default('NAC Group:NAC:IdentityGroups:User Identity Groups') }}"
+        description: "{{ item.description | default('') }}"
+      ignore_errors: yes
+      tags: [ identity_group, identity_groups ]
+
+    - name: Include Internal Users
+      ansible.builtin.include_vars: vars/ise/internal_users.yaml
+      tags: [ internal_user, internal_users ]
+
+    - name: Create Internal Users
+      when:
+        - internal_users is defined
+        - internal_users | count > 0
+      vars:
+        identity_group_default: a1740510-8c01-11e6-996c-525400b48521 # Employee
+      loop: "{{ internal_users }}"
+      cisco.ise.internal_user:
+        ise_hostname: "{{ ansible_host }}"
+        ise_username: "{{ ise_username }}"
+        ise_password: "{{ ise_password }}"
+        ise_verify: "{{ ise_verify }}"
+        state: "{{ item.state | default('present') }}"
+        name: "{{ item.username }}"
+        password: "{{ item.password }}"
+        changePassword: "{{ item.changePassword | default(false) }}"
+        enabled: "{{ item.enabled | default(true) }}"
+        expiryDateEnabled: "{{ item.expiryDateEnabled | default(false) }}"
+        passwordIDStore: Internal Users
+        identityGroups: "{{ identityGroups | default(identity_group_default) }}"
+      tags: [ internal_user, internal_users ]
+
+
+    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # 🐞 ISE 3.1 Patch 4 and 3.2 `networkdevicegroup` create fails.
+    # 🐞 It expects an `ndgtype` attribute instead of `othername`.
+    # 🐞 This should be fixed in ISE 3.1 Patch 5 and ISE 3.2 Patch 1
+    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    # - name: Include network_device_groups
+    #   ansible.builtin.include_vars: vars/ise/network_device_groups.yaml
+    #   tags: [ network_device_group, network_device ]
+
+    # - name: Create Network Device Groups
+    #   when:
+    #     - network_device_groups is defined
+    #     - network_device_groups | count > 0
+    #   loop: "{{ network_device_groups }}"
+    #   delegate_to: localhost
+    #   cisco.ise.network_device_group:
+    #     ise_hostname: "{{ ansible_host }}"
+    #     ise_username: "{{ ise_username }}"
+    #     ise_password: "{{ ise_password }}"
+    #     ise_verify:   "{{ ise_verify }}"
+    #     ise_debug:    "{{ ise_debug }}"
+    #     state: "{{ item.state | default('present') }}"
+    #     name:  "{{ item.name }}"
+    #     description: "{{ item.description }}"
+    #     othername:   "{{ item.othername }}"
+    #   tags: [ network_device_group, network_device ]
+
+
+    - name: Include network_devices
+      ansible.builtin.include_vars: vars/ise/network_devices.yaml
+      tags: [ network_device, network_devices, nad, nads ]
+
+    - name: Create Network Device
+      when:
+        - network_devices is defined
+        - network_devices | count > 0
+      delegate_to: localhost
+      loop: "{{ network_devices }}"
+      cisco.ise.network_device:
+        ise_hostname: "{{ ansible_host }}"
+        ise_username: "{{ ise_username }}"
+        ise_password: "{{ ise_password }}"
+        ise_verify:   "{{ ise_verify }}"
+        ise_debug:    "{{ ise_debug }}"
+
+        state:       "{{ item.state | default('present') }}"          # string
+        name:        "{{ item.name }}"                                # string
+        description: "{{ item.description | default('')}}"            # string
+        profileName: "{{ item.profileName | default('Cisco') }}"      # string
+        modelName:   "{{ item.modelName | default( omit ) }}"                    # string
+        softwareVersion: "{{ item.softwareVersion | default( omit ) }}"          # string
+
+        NetworkDeviceIPList: "{{ item.NetworkDeviceIPList }}"         # list of dicts
+        NetworkDeviceGroupList: "{{ item.network_device_groups | default( omit ) }}"  # list of strings
+
+        # RADIUS Authentication Settings
+        authenticationSettings:
+          # enabled: true
+          # RADIUS UDP Settings
+          networkProtocol: RADIUS
+          radiusSharedSecret: "{{ item.radiusSharedSecret | default( ise_radius_secret ) | default( omit ) }}"
+          enableMultiSecret:  "{{ item.enableMultiSecret | default('false') }}" # ⚠ string, not boolean!
+          secondRadiusSharedSecret: "{{ item.secondRadiusSharedSecret | default( omit ) }}"
+          # RADIUS DTLS Settings
+          dtlsRequired:  "{{ item.dtlsRequired | default( false ) }}"
+          # General Settings
+          enableKeyWrap:    "{{ item.enableKeyWrap | default( false ) }}"
+          keyEncryptionKey: "{{ item.keyEncryptionKey | default( omit ) }}" # string
+          messageAuthenticatorCodeKey: "{{ item.keyInputFormat | default( omit ) }}" # string
+          keyInputFormat: "{{ item.keyInputFormat | default( omit ) }}"    # [ 'ASCII', 'HEXADECIMAL' ]
+        coaPort:     "{{ item.coaPort | default(1700) }}"             # string
+        dtlsDnsName: "{{ item.dtlsDnsName | default( omit ) }}"                  # string
+
+        # TACACS Settings
+        tacacsSettings:
+          sharedSecret: "{{ item.sharedSecret | default( ise_tacacs_secret ) | default( omit ) }}"   # string
+          connectModeOptions: "{{ item.connectModeOptions | default('OFF') }}"            # string
+      tags: [ network_device, network_devices, nad, nads ]
+
+    - name: Include Endpoint Groups
+      ansible.builtin.include_vars: vars/ise/endpoint_groups.yaml
+      tags: [endpointgroup, endpointgroups, endpoint_group, endpoint_groups]
+
+    - name: Create Endpoint Groups
+      when:
+        - endpoint_groups is defined
+        - endpoint_groups | count > 0
+      loop: "{{ endpoint_groups }}"
+      delegate_to: localhost
+      cisco.ise.endpoint_group:
+        ise_hostname: "{{ ansible_host }}"
+        ise_username: "{{ ise_username }}"
+        ise_password: "{{ ise_password }}"
+        ise_verify: "{{ ise_verify }}"
+        state: "{{ item.state | default('present') }}"
+        name: "{{ item.name }}"
+        description: "{{ item.description }}"
+        systemDefined: "{{ item.systemDefined | default('false') }}"
+      tags: [endpointgroup, endpointgroups, endpoint_group, endpoint_groups]
+
+    - name: Include Endpoints
+      ansible.builtin.include_vars: vars/ise/endpoints.yaml
+
+    - name: Create Endpoints
+      when:
+        - endpoints is defined
+        - endpoints | count > 0
+      delegate_to: localhost
+      vars:
+        endpoint_group_default: aa13bb40-8bff-11e6-996c-525400b48521
+      loop: "{{ endpoints }}"
+      cisco.ise.endpoint:
+        ise_hostname: "{{ ansible_host }}"
+        ise_username: "{{ ise_username }}"
+        ise_password: "{{ ise_password }}"
+        ise_verify: "{{ ise_verify }}"
+        ise_debug: "{{ ise_debug }}"
+        state: "{{ item.state | default('present') }}" # ['present', 'absent']
+        mac: "{{ item.mac }}"
+        # ▼▼▼ optional attributes ▼▼▼
+        description: "{{ item.description | default(omit, true) }}" # string
+        # identityStore: string
+        # identityStoreId: string
+        # portalUser: string
+        # Endpoint Group Assignment
+        groupId: "{{ item.groupId | default( omit ) }}" # UUID
+        # groupId: "{{ item.groupId | default( endpoint_group_default ) }}"  # UUID
+        # profileId: "{{ groupId | default('0a9c6890-8c00-11e6-996c-525400b48521') }}"
+        staticGroupAssignment: "{{ item.staticGroupAssignment   | default(false) }}"
+        # Endpoint Profile Assignment
+        staticProfileAssignment: "{{ item.staticProfileAssignment | default(false) }}"
+        # Custom Attributes
+        customAttributes:
+          customAttributes: "{{ item.customAttributes | default( omit ) }}"
+      ignore_errors: yes
+      tags: [create, endpoint, endpoints]

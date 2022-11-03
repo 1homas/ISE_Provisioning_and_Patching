@@ -1,0 +1,18 @@
+---
+# tasks file for roles/ise_endpoint
+
+  #
+  # Create Endpoint Task
+  #
+
+  # - name: Default endpoint group ID
+  #   ansible.builtin.set_fact:
+  #     endpoint_group_default: aa13bb40-8bff-11e6-996c-525400b48521
+
+  - name: Create Endpoints
+    loop: "{{ endpoints }}"
+    ansible.builtin.include_tasks: endpoint.create.yml
+    tags: [ endpoint ]
+
+
+...

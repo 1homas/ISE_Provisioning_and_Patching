@@ -1,0 +1,30 @@
+---
+internal_users:
+  - username: thomas
+    password: ISEisC00L
+    description: ""
+    identityGroups: a1740510-8c01-11e6-996c-525400b48521 # Employee
+    state: present
+
+  - username: charlie
+    password: ISEisC00L
+    description: ""
+    identityGroups: a1740510-8c01-11e6-996c-525400b48521 # Employee
+    state: present
+
+  - username: guest_api_sponsor
+    password: ISEisC00L
+    description: "Sponsor Account for Using Guest APIs"
+    identityGroups: a176c430-8c01-11e6-996c-525400b48521 # ALL_ACCOUNTS (default)
+    # changePassword: false
+    # customAttributes: {}
+    # enabled: true
+    # expiryDateEnabled: false
+
+  # - username: meraki_8021x_test
+  #   password: C1sco12345
+  #   description: "Cisco Meraki RADIUS Test Probe"
+
+  # - username: radius-probe
+  #   password: C1sco12345
+  #   description: "Cisco RADIUS Test Probe"

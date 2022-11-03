@@ -1,0 +1,4 @@
+---
+# defaults file for roles/ise_backup_completed
+backup_retries: 360 # 360 retries * 10 seconds = 3600 seconds == 1 hour
+backup_delay: 10 # seconds to wait between retries

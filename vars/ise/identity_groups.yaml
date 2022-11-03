@@ -1,0 +1,51 @@
+---
+#
+# ⚠ ISE ERS API currently does not allow DELETE of identity groups
+#
+
+identity_groups:
+  #----------------------------------------------------------------------------
+  # Default Identity Groups - do not try to create or delet these!
+  #----------------------------------------------------------------------------
+
+  # - name: Employee
+  #   description: Default Employee User Group
+  #   parent: NAC Group:NAC:IdentityGroups:User Identity Groups
+
+  # - name: GuestType_Weekly (default)
+  #   description: 'Identity group mirroring the guest type'
+  #   parent: NAC Group:NAC:IdentityGroups:User Identity Groups
+  # - name: OWN_ACCOUNTS (default)
+  #   description: Default OWN_ACCOUNTS (default) User Group
+  #   parent: NAC Group:NAC:IdentityGroups:User Identity Groups
+  # - name: GROUP_ACCOUNTS (default)
+  #   description: Default GROUP_ACCOUNTS (default) User Group
+  #   parent: NAC Group:NAC:IdentityGroups:User Identity Groups
+  # - name: GuestType_SocialLogin (default)
+  #   description: 'Identity group mirroring the guest type'
+  #   parent: NAC Group:NAC:IdentityGroups:User Identity Groups
+  # - name: GuestType_Daily (default)
+  #   description: 'Identity group mirroring the guest type'
+  #   parent: NAC Group:NAC:IdentityGroups:User Identity Groups
+  # - name: GuestType_Contractor (default)
+  #   description: 'Identity group mirroring the guest type'
+  #   parent: NAC Group:NAC:IdentityGroups:User Identity Groups
+  # - name: ALL_ACCOUNTS (default)
+  #   description: Default ALL_ACCOUNTS (default) User Group
+  #   parent: NAC Group:NAC:IdentityGroups:User Identity Groups
+
+  #----------------------------------------------------------------------------
+  # New Groups
+  #----------------------------------------------------------------------------
+
+  - name: Vendor
+    description: Vendors and Contractors
+    parent: NAC Group:NAC:IdentityGroups:User Identity Groups
+
+  - name: Temporary Exception
+    description: Temporary exception
+    parent: NAC Group:NAC:IdentityGroups:User Identity Groups
+
+  - name: RADIUS_Probes
+    description: Group for RADIUS probe internal users
+    parent: NAC Group:NAC:IdentityGroups:User Identity Groups

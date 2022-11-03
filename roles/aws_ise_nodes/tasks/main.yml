@@ -1,0 +1,44 @@
+---
+# tasks file for roles/aws_ise_nodes
+
+# - ansible.builtin.debug:
+#     msg:
+#       - "{{ item }}"
+#       - "hostname: {{ item.name | lower }}"
+#       - "primarynameserver: {{ dns_server | default('208.67.222.222') }}"
+#       - "dnsdomain: {{ domain_name | default('demo.local') }}"
+#       - "ntpserver: {{ ntp_server | default('time.nist.gov') }}"
+#       - "timezone: {{ timezone | default('Etc/UTC') }}"
+#       - "username: {{ ise_username }}"
+#       - "password: {{ ise_init_password }}"
+#       - "project: {{ project_name }}"
+#       - "roles: {{ item.roles | default( 'Standalone') }}"
+#       - "services: {{ item.services | default( '[]') }}"
+
+- name: Create ISE Instance
+  loop: "{{ ise_nodes }}"
+  amazon.aws.ec2_instance:
+    # state: present  # instances exist but not guarantee of state (e.g. running)
+    state: running # present + ensures the instances are running
+    # state: started  # running + waits for EC2 status checks; ~3 minutes per node
+    region: "{{ aws_region }}"
+    vpc_subnet_id: "{{ subnet_private.subnet.id }}"
+    image_id: "{{ item.ami }}"
+    instance_type: "{{ item.instance_type }}"
+    key_name: "{{ ssh_key_name }}"
+    network:
+      assign_public_ip: yes
+      delete_on_termination: yes
+      private_ip_address: "{{ item.private_ip | default( item.private_ip_address ) }}"
+    security_group: "{{ item.security_group }}" #  SG_Public # name or ID
+    volumes:
+      - device_name: /dev/sda1
+        ebs:
+          delete_on_termination: true
+          volume_size: "{{ item.volume_size | default( omit ) }}"
+    wait: yes
+    tags: "{{ item.tags }}"
+    user_data: "hostname={{ item.name | lower }}\nprimarynameserver={{ dns_server | default('208.67.222.222') }}\ndnsdomain={{ domain_name | default('demo.local') }}\nntpserver={{ ntp_server | default('time.nist.gov') }}\ntimezone={{ timezone | default('Etc/UTC') }}\nusername={{ ise_username }}\npassword={{ ise_init_password }}"
+  register: ise_instances
+# - name: Show ISE Instances
+#   ansible.builtin.debug: var=ise_instances

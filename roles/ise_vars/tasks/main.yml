@@ -1,0 +1,14 @@
+---
+# tasks file for roles/ise_vars
+- name: ISE Variables
+  delegate_to: localhost
+  loop:
+    - inventory_hostname
+    - ansible_host
+    - ise_username
+    - ise_password
+    - ise_verify
+    - ise_debug
+  when: lookup('vars', item) is undefined
+  ansible.builtin.fail:
+    msg: "{{ item }} is undefined!" # : {{ lookup('vars', item) }}"

@@ -1,0 +1,87 @@
+---
+#------------------------------------------------------------------------------
+# ISE Small Deployment (2 nodes)
+# Notes:
+# - pxGrid Cloud may be enabled on <= 2 nodes
+# - pxGrid may be enabled on <= 4 nodes
+#------------------------------------------------------------------------------
+
+ise_nodes:
+  - name: ise-1
+    ami: "{{ ise_image }}"
+    instance_type: "{{ ise_instance_type_default }}"
+    security_group: "{{ ise_security_group_default }}"
+    private_ip: 172.31.2.11
+    roles: # use [] (no roles) for dedicated PSN. Default: Standalone
+      - Standalone # default
+    services: # use [] (no services) for dedicated PAN/MNT. Default: [Profiler, Session]
+      - Profiler # default
+      - Session # default
+    tags:
+      Name: ise-1
+      data_class: public # [Public, Confidential, Highly confidential]
+      business_unit: ENCC
+      application: ise
+      environment: demo # [Demo, Prod, Dev, QA, Stage, Test]
+      owner: "{{ owner }}" # Owner of the application, workload, or service
+      team: TME
+      project: "{{ project_name }}"
+      roles:
+        - PrimaryAdmin
+        - PrimaryMonitoring
+      services: # use [] (no services) for dedicated PAN/MNT
+        - DeviceAdmin
+        - Profiler # default
+        - Session # default
+        - pxGrid # 4 node limit
+        - pxGridCloud # 2 node limit
+      started: "{{ '%Y-%m-%dT%H:%M:%S-%Z' | strftime }}"
+
+  - name: ise-2
+    ami: "{{ ise_image }}"
+    instance_type: "{{ ise_instance_type_default }}"
+    security_group: "{{ ise_security_group_default }}"
+    private_ip: 172.31.2.12
+    tags:
+      Name: ise-1
+      data_class: public # [Public, Confidential, Highly confidential]
+      business_unit: ENCC
+      application: ise
+      environment: demo # [Demo, Prod, Dev, QA, Stage, Test]
+      owner: "{{ owner }}" # Owner of the application, workload, or service
+      team: TME
+      project: "{{ project_name }}"
+      roles:
+        - SecondaryAdmin
+        - SecondaryMonitoring
+      services: # use [] (no services) for dedicated PAN/MNT
+        - DeviceAdmin
+        - Profiler # default
+        - Session # default
+        - pxGrid # 4 node limit
+        - pxGridCloud # 2 node limit
+      started: "{{ '%Y-%m-%dT%H:%M:%S-%Z' | strftime }}"
+
+  #
+  # Optional third node for for HA Failover or extra PSN
+  #
+  - name: ise-3
+    ami: "{{ ise_image }}"
+    instance_type: "{{ ise_instance_type_default }}"
+    security_group: "{{ ise_security_group_default }}"
+    private_ip: 172.31.2.13
+    tags:
+      Name: ise-1
+      data_class: public # [Public, Confidential, Highly confidential]
+      business_unit: ENCC
+      application: ise
+      environment: demo # [Demo, Prod, Dev, QA, Stage, Test]
+      owner: "{{ owner }}" # Owner of the application, workload, or service
+      team: TME
+      project: "{{ project_name }}"
+      roles: [] # use [] (no roles) for dedicated PSN
+      services: # use [] (no services) for dedicated PAN/MNT
+        - DeviceAdmin
+        - Profiler # default
+        - Session # default
+      started: "{{ '%Y-%m-%dT%H:%M:%S-%Z' | strftime }}"

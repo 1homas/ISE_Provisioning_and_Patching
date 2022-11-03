@@ -1,0 +1,24 @@
+---
+# tasks file for roles/aws_ec2_show
+
+- name: Get AWS EC2 Instances
+  amazon.aws.ec2_instance_info:
+    region: "{{ aws_region | default(omit) }}"
+    filters: "{{ show_filters | default(omit) }}"
+  register: ec2
+
+# - ansible.builtin.debug: var=ec2.instances
+
+- name: Show AWS EC2 Instances Table
+  delegate_to: localhost
+  when:
+    - ec2 is defined
+    - ec2.instances is defined
+    - ec2.instances | count > 0
+  vars:
+    head: "{{ show_head }}"
+    hide: "{{ show_hide }}"
+    maxw: "{{ show_maxw }}"
+    rows: "{{ ec2.instances | flatten }}"
+    temp: "{{ lookup('template', 'list_of_dicts.j2') }}"
+  ansible.builtin.shell: "echo '{{ temp }}' > /dev/tty"

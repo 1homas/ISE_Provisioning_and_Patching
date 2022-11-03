@@ -1,0 +1,88 @@
+---
+# tasks file for aws_env_ansible_valid
+
+- name: Validate AWS Environment Status Cache
+  delegate_to: localhost
+  ansible.builtin.stat:
+    path: "{{ cache_file }}"
+  register: status
+
+# - name: Delta
+#   when: status.stat.exists
+#   ansible.builtin.debug:
+#     msg="{{ ( '%s' | strftime | int ) - ( status.stat.mtime | int ) }}"
+
+- name: Validate AWS Environment
+  when: not status.stat.exists
+    or
+    (( '%s' | strftime | int ) - ( status.stat.mtime | int )) > cache_time
+  block:
+
+    - name: Check AWS Region Environment Variables
+      delegate_to: localhost
+      when:
+        - lookup('env', 'AWS_REGION') is undefined
+        - lookup('env', 'EC2_REGION') is undefined
+      ansible.builtin.fail:
+        msg: |+
+          Please set environment variable AWS_REGION or EC2_REGION:
+
+          export AWS_REGION=__________
+          export EC2_REGION=__________
+
+
+    - name: Check aws_access_key Environment Variables
+      delegate_to: localhost
+      when:
+        - lookup('env', 'AWS_ACCESS_KEY') is undefined
+        - lookup('env', 'AWS_ACCESS_KEY_ID') is undefined
+        - lookup('env', 'EC2_ACCESS_KEY') is undefined
+      ansible.builtin.fail:
+        msg: |+
+          Please set one of these environment variables:
+
+          export AWS_ACCESS_KEY=__________
+          export AWS_ACCESS_KEY_ID=__________
+          export EC2_ACCESS_KEY=__________
+
+    - name: Check aws_secret_key Environment Variables
+      delegate_to: localhost
+      when:
+        - lookup('env', 'AWS_SECRET_KEY') is undefined
+        - lookup('env', 'AWS_SECRET_ACCESS_KEY') is undefined
+        - lookup('env', 'EC2_SECRET_KEY') is undefined
+      ansible.builtin.fail:
+        msg: |+
+          Please set one of these environment variables:
+
+          export AWS_SECRET_KEY=__________
+          export AWS_SECRET_ACCESS_KEY=__________
+          export EC2_SECRET_KEY=__________
+
+    - name: Validate AWS APIS are Functional
+      amazon.aws.aws_caller_info:
+      register: aws_caller_info
+      failed_when: aws_caller_info is undefined or aws_caller_info.failed
+
+      #----------------------------------------------------------------------------
+      # Example:
+      #
+      # aws_caller_info:
+      #   account: 'xxxxxxxxxxxx'
+      #   account_alias: ''
+      #   arn: arn:aws:iam::xxxxxxxxxxxx:user/username
+      #   changed: false
+      #   failed: false
+      #   user_id: xxxxxxxxxxxxxxxxxxxxx
+      #----------------------------------------------------------------------------
+
+- name: Cache AWS Environment Status with Hidden File
+  when: not status.stat.exists
+    or
+    (( '%s' | strftime | int ) - ( status.stat.mtime | int )) > cache_time
+  ansible.builtin.file:
+    path: "{{ cache_file }}"
+    state: touch
+#   register: touched
+# - ansible.builtin.debug: var=touched.diff.after.mtime
+

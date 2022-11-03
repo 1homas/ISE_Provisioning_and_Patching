@@ -1,0 +1,113 @@
+---
+#------------------------------------------------------------------------------
+# ISE Medium Deployment
+# - ise-ppan
+# - ise-span
+# - ise-psn-1
+# - ise-psn-2
+#
+# roles: # use [] (no roles) for dedicated PSN
+#   - Standalone
+#   - PrimaryAdmin
+#   - PrimaryMonitoring
+#   - SecondaryAdmin
+#   - SecondaryMonitoring
+#   - PrimaryDedicatedMonitoring
+#   - SecondaryDedicatedMonitoring
+# services: # use [] (no services) for dedicated PAN/MNT
+#   - DeviceAdmin
+#   - Profiler
+#   - Session
+#   - pxGrid
+#   - pxGridCloud
+#   - PassiveIdentity
+#   - SXP
+#   - TC-NAC
+#------------------------------------------------------------------------------
+
+ise_nodes:
+  - name: ise-ppan
+    ami: "{{ ise_image }}"
+    instance_type: "{{ ise_instance_type_default }}"
+    private_ip: 172.31.2.11
+    security_group: "{{ ise_security_group_default }}"
+    tags:
+      Name: ise-ppan
+      data_class: public # [Public, Confidential, Highly confidential]
+      business_unit: ENCC
+      application: ise
+      environment: demo # [Demo, Prod, Dev, QA, Stage, Test]
+      owner: "{{ owner }}" # Owner of the application, workload, or service
+      team: TME
+      project: "{{ project_name }}"
+      roles:
+        - PrimaryAdmin
+        - PrimaryMonitoring
+      services: [] # use [] (no services) for dedicated PAN/MNT
+      started: "{{ '%Y-%m-%dT%H:%M:%S-%Z' | strftime }}"
+
+  - name: ise-span
+    ami: "{{ ise_image }}"
+    instance_type: "{{ ise_instance_type_default }}"
+    private_ip: 172.31.2.12
+    security_group: "{{ ise_security_group_default }}"
+    tags:
+      Name: ise-span
+      data_class: public # [Public, Confidential, Highly confidential]
+      business_unit: ENCC
+      application: ise
+      environment: demo # [Demo, Prod, Dev, QA, Stage, Test]
+      owner: "{{ owner }}" # Owner of the application, workload, or service
+      team: TME
+      project: "{{ project_name }}"
+      roles:
+        - SecondaryAdmin
+        - SecondaryMonitoring
+      services: [] # use [] (no services) for dedicated PAN/MNT
+      started: "{{ '%Y-%m-%dT%H:%M:%S-%Z' | strftime }}"
+
+  - name: ise-psn-1
+    ami: "{{ ise_image }}"
+    instance_type: "{{ ise_instance_type_default }}"
+    private_ip: 172.31.2.21
+    security_group: "{{ ise_security_group_default }}"
+    tags:
+      Name: ise-psn-1
+      data_class: public # [Public, Confidential, Highly confidential]
+      business_unit: ENCC
+      application: ise
+      environment: demo # [Demo, Prod, Dev, QA, Stage, Test]
+      owner: "{{ owner }}" # Owner of the application, workload, or service
+      team: TME
+      project: "{{ project_name }}"
+      roles: [] # use [] (no roles) for dedicated PSN
+      services:
+        - DeviceAdmin
+        - Profiler    # default
+        - Session     # default
+        - pxGrid      # 4 node limit
+        - pxGridCloud # 2 node limit
+      started: "{{ '%Y-%m-%dT%H:%M:%S-%Z' | strftime }}"
+
+  - name: ise-psn-2
+    ami: "{{ ise_image }}"
+    instance_type: "{{ ise_instance_type_default }}"
+    private_ip: 172.31.2.22
+    security_group: "{{ ise_security_group_default }}"
+    tags:
+      Name: ise-psn-2
+      data_class: public # [Public, Confidential, Highly confidential]
+      business_unit: ENCC
+      application: ise
+      environment: demo # [Demo, Prod, Dev, QA, Stage, Test]
+      owner: "{{ owner }}" # Owner of the application, workload, or service
+      team: TME
+      project: "{{ project_name }}"
+      roles: [] # use [] (no roles) for dedicated PSN
+      services:
+        - DeviceAdmin
+        - Profiler    # default
+        - Session     # default
+        - pxGrid      # 4 node limit
+        - pxGridCloud # 2 node limit
+      started: "{{ '%Y-%m-%dT%H:%M:%S-%Z' | strftime }}"

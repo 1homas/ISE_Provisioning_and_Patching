@@ -1,0 +1,76 @@
+---
+# tasks file for roles/ansible_special_variables
+# - name: Ansible Magic Variables
+#   hosts: all
+#   gather_facts: false
+#   tasks:
+  - name: Magic Variable {{ item }}
+    ansible.builtin.debug:
+      var: "{{ item }}"
+    loop:
+    - ansible_config_file
+    - playbook_dir
+    - inventory_dir
+    - inventory_file
+    - ansible_check_mode
+    - ansible_diff_mode
+    - ansible_forks
+    - ansible_verbosity
+    - inventory_hostname
+    - ansible_play_hosts
+    - ansible_version
+    #
+    # Magic variables - cannot be set directly by the user
+    #
+    - ansible_check_mode    # Boolean that indicates if we are in check mode or not
+    - ansible_config_file   # Full path of used Ansible configuration file
+    - ansible_dependent_role_names    # Names of the roles currently imported into the current play as dependencies of other plays
+    - ansible_diff_mode     # Boolean that indicates if we are in diff mode or not
+    - ansible_forks         # Maximum number of forks available to this run
+    - ansible_inventory_sources   # List of sources used as inventory
+    - ansible_limit   # Contents of the --limit CLI option
+    - ansible_loop    # Dict/map of extended loop information when enabled
+    - ansible_loop_var    # Name of the loop_control.loop_var
+    - ansible_index_var   # Name of the value provided to loop_control.index_var
+    - ansible_parent_role_names   # When the current role is being executed by means of an include_role or import_role action, this variable contains a list of all parent roles, with the most recent role (in other words, the role that included/imported this role) being the first item in the list. When multiple inclusions occur, this list lists the last role (in other words, the role that included this role) as the first item in the list. It is also possible that a specific role exists more than once in this list.    # For example: When role A includes role B, inside role B, ansible_parent_role_names will equal to ['A']. If role B then includes role C, the list becomes ['B', 'A'].
+    - ansible_parent_role_paths   # When the current role is being executed by means of an include_role or import_role action, this variable contains a list of all parent roles, with the most recent role (in other words, the role that included/imported this role) being the first item in the list. Please refer to ansible_parent_role_names for the order of items in this list.
+    - ansible_play_batch  # List of active hosts in the current play, limited by serial
+    - ansible_play_hosts  # List of hosts in the current play, not limited by serial
+    - ansible_play_hosts_all    # List of all the hosts that were targeted by the play
+    - ansible_play_role_names   # Names of roles imported into the current play
+    - ansible_playbook_python   # Path to Python used by Ansible on the controller
+    - ansible_role_names   # Names of the roles imported into the current play
+    - ansible_role_name    # Fully qualified collection role name
+    - ansible_collection_name   # Name of collection that the executing task belongs
+    - ansible_run_tags    # Contents of the --tags CLI option
+    - ansible_search_path    # Current search path for action plugins and lookups, in other words, where we search for relative paths when you do template: src=myfile
+    - ansible_skip_tags    # Contents of the --skip-tags CLI option
+    - ansible_verbosity  # Current verbosity setting for Ansible
+    - ansible_version    # Dict/map containing running version of ansible
+    - group_names # List of groups the current host is a member
+    - groups      # Dict/map of all groups in inventory and hosts belonging to it
+    - hostvars    # A dictionary/map with all hosts and variables in inventory
+    - inventory_hostname  # Inventory name for the ‘current’ host in the play
+    - inventory_hostname_short  # The short version of inventory_hostname
+    - inventory_dir     # Directory of inventory source defining the inventory_hostname
+    - inventory_file    # Filename of inventory source defining the inventory_hostname
+    - omit    # Special variable that allows you to ‘omit’ an option in a task, for example - user: name=bob home={{ bobs_home|default(omit) }}
+    - ansible_play_name   # Name (not filename) of the currently executed play
+    - playbook_dir # Path to the playbook in ansible-playbook command line.
+    - role_name    # Name of the role currently being executed.
+    - role_path    # The path to the dir of the currently running role
+    #
+    # Facts
+    #
+    - ansible_facts    # Any facts gathered or cached for the inventory_hostname
+    - ansible_local    # Any ‘local facts’ for the inventory_hostname
+    #
+    # Connection variables
+    #
+    - ansible_become_user # The user Ansible ‘becomes’ for privilege escalation
+    - ansible_connection  # The connection plugin used for the target host
+    - ansible_host        # IP or name of target host instead of inventory_hostname
+    - ansible_python_interpreter  # Path to the Python executable on target host
+    - ansible_user        # The user Ansible ‘logs in’ as.
+
+...

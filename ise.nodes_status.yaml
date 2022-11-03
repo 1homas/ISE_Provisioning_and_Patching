@@ -1,0 +1,54 @@
+---
+- name: Get ISE Nodes
+  hosts: localhost
+  gather_facts: no
+  vars_files: vars/main.yaml
+  tasks:
+    - name: Get ISE PPAN Name
+      ansible.builtin.set_fact:
+        ise_ppan_name: "{{ groups['role_PrimaryAdmin'] | first }}"
+
+    - name: Get All ISE Deployment Nodes Status
+      cisco.ise.node_deployment_info:
+        ise_hostname: "{{ hostvars[ise_ppan_name].ansible_host }}"
+        ise_username: "{{ ise_username }}"
+        ise_password: "{{ ise_password }}"
+        ise_verify: "{{ ise_verify }}"
+        ise_debug: "{{ ise_debug }}"
+      register: node_deployment_info
+
+    # - name: Show ISE Nodes
+    #   ansible.builtin.debug:
+    #     var: node_deployment_info
+
+    - name: Show ISE Facts Summary Table
+      delegate_to: localhost
+      when:
+        - node_deployment_info is defined
+        - node_deployment_info.ise_response | length > 0
+      vars:
+        # maxw: 50
+        head: [
+            "hostname",
+            "fqdn",
+            "ipAddress",
+            "nodeStatus",
+            # 'roles',
+            # 'services',
+          ]
+        rows: "{{ node_deployment_info.ise_response  }}"
+        temp: "{{ lookup('template', 'list_of_dicts.j2') }}"
+      ansible.builtin.shell: "echo '{{ temp }}' > /dev/tty"
+
+    - name: Get All ISE Deployment Nodes Status
+      cisco.ise.node_deployment_info:
+        ise_hostname: "{{ hostvars[ise_ppan_name].ansible_host }}"
+        ise_username: "{{ ise_username }}"
+        ise_password: "{{ ise_password }}"
+        ise_verify: "{{ ise_verify }}"
+        ise_debug: "{{ ise_debug }}"
+      register: node_deployment_info
+      until: node_deployment_info.ise_response | selectattr('nodeStatus', '!=', 'Connected') | count == 0
+      delay: 30 # Default: 0. Seconds to delay between retries
+      retries: 120
+      timeout: 3600 # retries * delay. Default: 300. Stop checking after <seconds>

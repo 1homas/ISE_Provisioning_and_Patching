@@ -1,0 +1,5 @@
+---
+# defaults file for roles/ise_backup_now
+backup_repository: LOCALDISK
+backup_encryption_key: C1sco12345
+backup_name: "{{ '%Y%m%d-%H%M%S' | strftime }}"

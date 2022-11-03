@@ -1,0 +1,12 @@
+---
+# tasks file for roles/ssh_commands
+
+
+- name: Show SSH Commands for Instance
+  delegate_to: localhost
+  when: inventory_hostname != 'localhost'
+  ansible.builtin.debug:
+    msg:
+      - "ssh -i {{ ssh_key_private_file }} {{ ansible_ssh_user | default('user') }}@{{ inventory_hostname }}.{{ domain_name | default('') }}"
+      - "ssh -i {{ ssh_key_private_file }} {{ ansible_ssh_user | default('user') }}@{{ hostvars[inventory_hostname].public_ip_address }}"
+      - "ssh -i {{ ssh_key_private_file }} {{ ansible_ssh_user | default('user') }}@{{ hostvars[inventory_hostname].private_ip_address }}"

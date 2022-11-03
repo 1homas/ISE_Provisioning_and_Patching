@@ -1,0 +1,15 @@
+---
+- name: ISE Facts from Standalone Nodes
+  hosts: localhost
+  gather_facts: no
+  vars_files: vars/main.yaml
+  roles:
+    - wait_for_ise_login
+    - ise_facts_standalone
+    - role: print_vars
+      vars:
+        var_names:
+          - ise_facts
+    - ise_facts_table
+
+

@@ -1,0 +1,9 @@
+---
+# defaults file for roles/aws_r53_dns_entry
+zone: "{{ domain_name }}"
+record: "{{ inventory_hostname }}.{{ domain_name }}"
+overwrite: yes
+private_zone: no
+type: A
+ttl: 600
+value: "{{ public_ip_address }}"

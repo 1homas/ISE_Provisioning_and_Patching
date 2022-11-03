@@ -1,0 +1,30 @@
+---
+# tasks file for roles/aws_stop_instances
+
+- name: Get all EC2 Instances | project:"{{ project_name }}"
+  community.aws.ec2_instance_info: # get all by default
+    filters:
+      instance-state-name: running
+      "tag:project": "{{ project_name }}"
+  register: ec2_instances
+# - ansible.builtin.debug: var=ec2_instances
+
+- name: Stop all EC2 Instances | project:"{{ project_name }}"
+  when: ec2_instances is defined and ec2_instances.instances | length > 0
+  community.aws.ec2_instance:
+    state: stopped
+    wait: yes
+    filters:
+      instance-state-name: ["running"]
+      "tag:project": "{{ project_name }}"
+  register: ec2_instances_stopped
+- ansible.builtin.debug: var=ec2_instances_stopped
+
+# - name: Instances
+#   delegate_to: localhost
+#   loop: "{{ ec2_instances_stopped.instances }}"
+#   vars:
+#     head: ['instance_id','instance_type','private_ip_address','public_ip_address']
+#     rows: "{{ ec2_instances_stopped.instances }}"
+#     temp: "{{ lookup('template', 'list_of_dicts.j2') }}"
+#   ansible.builtin.shell: "echo '{{ item.instance_id }} {{ item.instance_type }} {{ item.private_ip_address }} {{ item.public_ip_address }} {{ item.state.name }} {{ item.tags.Name }} {{ item.security_groups.group_name }} ' > /dev/tty"

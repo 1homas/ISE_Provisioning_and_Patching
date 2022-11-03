@@ -1,0 +1,632 @@
+---
+sgts:
+  #------------------------------------------------------------------------------
+  # These SGTs are RESERVED by ISE or Meraki and should never be changed.
+  #------------------------------------------------------------------------------
+
+  # 🛑 'Unknown' cannot be renamed or modified
+  # - name: Unknown
+  #   value: 0
+  #   description: Unknown. Reserved by ISE and Meraki. The Unknown group applies when a policy is specified for unsuccessful group classification.
+  #   generationId: '0'
+  #   propogateToApic: false
+
+  - name: Infrastructure
+    value: 2
+    description: Reserved by Meraki devices for internal and dashboard communication.
+    generationId: "0"
+    propogateToApic: yes
+
+  - name: TrustSec_Devices
+    value: 3
+    description: TrustSec Devices
+    generationId: "0"
+    propogateToApic: yes
+
+  - name: Quarantine
+    value: 255
+    description: Quarantine
+    generationId: "0"
+    propogateToApic: yes
+
+  #------------------------------------------------------------------------------
+  # These SGTs are the ISE default SGTs
+  #------------------------------------------------------------------------------
+
+  # - name: Network_Services
+  #   value: 3
+  #   description: Network Services
+  #   generationId: '0'
+  #   propogateToApic: yes
+
+  # - name: Employees
+  #   value: 4
+  #   description: Employee
+  #   generationId: '0'
+  #   propogateToApic: yes
+
+  # - name: Contractors
+  #   value: 5
+  #   description: Contractor
+  #   generationId: '0'
+  #   propogateToApic: yes
+
+  # - name: Guests
+  #   value: 6
+  #   description: Guest
+  #   generationId: '0'
+  #   propogateToApic: yes
+
+  # - name: Production_Users
+  #   value: 7
+  #   description: Production User
+  #   generationId: '0'
+  #   propogateToApic: yes
+
+  # - name: Developers
+  #   value: 8
+  #   description: Developer
+  #   generationId: '0'
+  #   propogateToApic: yes
+
+  # - name: Auditors
+  #   value: 9
+  #   description: Auditor
+  #   generationId: '0'
+  #   propogateToApic: yes
+
+  # - name: Point_of_Sale_Systems
+  #   value: 10
+  #   description: Point of Sale
+  #   generationId: '0'
+  #   propogateToApic: yes
+
+  # - name: Production_Servers
+  #   value: 11
+  #   description: Production Servers
+  #   generationId: '0'
+  #   propogateToApic: yes
+
+  # - name: Development_Servers
+  #   value: 12
+  #   description: Development Servers
+  #   generationId: '0'
+  #   propogateToApic: yes
+
+  # - name: Test_Servers
+  #   value: 13
+  #   description: Test Servers
+  #   generationId: '0'
+  #   propogateToApic: yes
+
+  # - name: PCI_Servers
+  #   value: 14
+  #   description: PCI Servers
+  #   generationId: '0'
+  #   propogateToApic: yes
+
+  # - name: BYOD
+  #   value: 15
+  #   description: BYOD
+  #   generationId: '0'
+  #   propogateToApic: yes
+
+  #------------------------------------------------------------------------------
+  # Renumber SGTs
+  #------------------------------------------------------------------------------
+
+  - name: BYOD
+    value: 9
+    description: BYOD Endpoints
+    generationId: "0"
+    propogateToApic: yes
+
+  - name: Guests
+    value: 6
+    description: Guests
+    generationId: "0"
+    propogateToApic: yes
+
+  - name: Employees
+    value: 5
+    description: Employee
+    generationId: "0"
+    propogateToApic: yes
+
+  - name: Vendors
+    state: absent
+    value: 7
+    description: Vendors
+    generationId: "0"
+    propogateToApic: yes
+
+  - name: Network_Services
+    state: absent
+    value: 8
+    description: Network Services
+    generationId: "0"
+    propogateToApic: yes
+
+  - name: NetServices
+    state: present
+    value: 8
+    description: Network Services
+    generationId: "0"
+    propogateToApic: yes
+
+  - name: Printer
+    state: present
+    value: 10
+    description: Printer and Print Servers
+    generationId: "0"
+    propogateToApic: yes
+
+  - name: Physical_Security
+    state: absent
+    value: 11
+    description: Physical_Security
+    generationId: "0"
+    propogateToApic: yes
+
+  #------------------------------------------------------------------------------
+  # Additional SGTs
+  #------------------------------------------------------------------------------
+
+  - name: Phones
+    state: absent
+    value: 20
+    description: Phones
+    generationId: "0"
+    propogateToApic: yes
+
+  - name: IOT
+    state: present
+    value: 21
+    description: IOT endpoints
+    generationId: "0"
+    propogateToApic: yes
+
+  - name: AudioVisual
+    state: absent
+    value: 22
+    description: AudioVisual gear
+    generationId: "0"
+    propogateToApic: yes
+
+  - name: Camera
+    state: present
+    value: 23
+    description:
+    generationId: "0"
+    propogateToApic: yes
+
+  - name: Entertainment
+    state: absent
+    value: 24
+    description: Entertainment
+    generationId: "0"
+    propogateToApic: yes
+
+  - name: Signage
+    state: present
+    value: 25
+    description: Digital Signage
+    generationId: "0"
+    propogateToApic: yes
+#------------------------------------------------------------------------------
+# Additional SGTs
+#------------------------------------------------------------------------------
+
+# - name: TrustSec_Devices
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Network_Services
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Corporate
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Homecare
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: IT
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Lifecare
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Materials_Management
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Phone
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Phone_Server
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: FixMe
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Internet
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Internet_DMZ
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+#------------------------------------------------------------------------------
+# Generic Corporation
+#------------------------------------------------------------------------------
+# - name: Guest
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: BYOD
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Build
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Lab
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Server
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: User
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Quarantine
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Platform_Services
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: VDI
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+#------------------------------------------------------------------------------
+# Generic Financial
+#------------------------------------------------------------------------------
+
+# - name: MDM_Failed
+#   value: 40110
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Posture_Failed
+#   value: 30110
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Contained
+#   value: 9999
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: CWA_Access
+#   value: 29030
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: CWA_EZC_Pre_Auth
+#   value: 29050
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: CWA_Redirect
+#   value: 9030
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: DC_Infra
+#   value: 230
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: DC_Non_Prod
+#   value: 2000
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: DC_Security_Tools
+#   value: 1080
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: DataCenters
+#   value: 1000
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Developer
+#   value: 11150
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Internet
+#   value: 64000
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: IP_Phone_Avaya
+#   value: 8051
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: IP_Phone_Cisco
+#   value: 8050
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: MAB_IP_Phone
+#   value: 8060
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: MAB_Printers
+#   value: 8080
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Machine_Authentication
+#   value: 8030
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Mobile_User
+#   value: 41110
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: NADs
+#   value: 210
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Onboarding
+#   value: 9090
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Other
+#   value: 8991
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Physical_Security
+#   value: 8090
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Posture_Failed
+#   value: 10110
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Posture_Unknown
+#   value: 9000
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Printers
+#   value: 8070
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Print_Servers
+#   value: 1005
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Servers
+#   value: 8040
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: SysAdmin
+#   value: 11161
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: TrustSec
+#   value: 200
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: User
+#   value: 11110
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: VPN_SysAdmin
+#   value: 60181
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: VPN_User
+#   value: 60170
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: WAN
+#   value: 9099
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: WAN_Fallback
+#   value: 29099
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: WAN_Summary
+#   value: 29095
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+#------------------------------------------------------------------------------
+# Generic Medical
+#------------------------------------------------------------------------------
+
+# - name: Any
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Medical
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: PCI
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Network_Device
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Default
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Network_Tools
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Comm_Services
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Vendor
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: MRI
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Radiology
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+
+# - name: Internet
+#   value: 7
+#   description:
+#   generationId: '0'
+#   propogateToApic: yes
+

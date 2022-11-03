@@ -1,0 +1,79 @@
+---
+- name: ISE Backup Now Playbook
+  hosts: localhost
+  gather_facts: no
+  vars_files: vars/main.yaml
+  vars:
+    ise_ppan_name: "{{ groups['role_PrimaryAdmin'] | first }}"
+    inventory_hostname: "{{ ise_ppan_name }}"
+    ansible_host: "{{ hostvars[ise_ppan_name].ansible_host }}"
+    backup_repository: "{{ lookup('env','ISE_REPOSITORY') }}"
+    backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
+    backup_name: NOW
+
+  tasks:
+    - name: Backup Configuration Now | {{ inventory_hostname }} ⮕ {{ backup_repository }})
+      cisco.ise.backup_config:
+        ise_hostname: "{{ ansible_host }}"
+        ise_username: "{{ ise_username }}"
+        ise_password: "{{ ise_password }}"
+        ise_verify: "{{ ise_verify }}"
+        ise_debug: "{{ ise_debug }}"
+        repositoryName: "{{ backup_repository }}"
+        backupName: "{{ backup_name | default( '%Y%m%d-%H%M%S' | strftime ) }}"
+        backupEncryptionKey: "{{ backup_encryption_key }}"
+      register: backup_status
+      failed_when: "'initiated' not in backup_status.ise_response.response.message"
+
+      # Example backup_status:
+      # ```
+      # backup_status:
+      #   ise_response:
+      #     response:
+      #       id: 9c5b9c70-3252-11ed-8ded-fed6979bc33c
+      #       message: Config DB backup task initiated. Please use Task Service status API to get the status of the backup job
+      #     version: 1.0.0
+      # ```
+
+    # - ansible.builtin.debug: var=backup_status
+
+    - name: Backup Status | {{ inventory_hostname }} ({{ ansible_host }})
+      when: backup_status.ise_response.response.id is defined
+      vars:
+        line1: "ISE Backup Started @ {{ '%Y-%m-%dT%H:%M:%S%Z' | strftime }}"
+        line2:
+        line3: "Task ID: {{ backup_status.ise_response.response.id }}"
+        line4:
+        ok: |
+                _
+               ( |
+             ___\ \
+            (__()  `-|  {{ line1 }}
+            (___()   |  {{ line2 }}
+            (__()    |  {{ line3 }}
+            (_()__.--|  {{ line4 }}
+           
+      ansible.builtin.shell: "echo '{{ ok }}' > /dev/tty"
+
+    - name: ISE Backup In Progress | {{ inventory_hostname }} ({{ ansible_host }})
+      cisco.ise.backup_last_status_info:
+        ise_hostname: "{{ ansible_host }}"
+        ise_username: "{{ ise_username }}"
+        ise_password: "{{ ise_password }}"
+        ise_verify: "{{ ise_verify }}"
+        ise_debug: "{{ ise_debug }}"
+      register: backup_status
+      until: backup_status.ise_response.status != 'IN_PROGRESS'
+      retries: 360 # 360 retries * 10s delay = 3600s == 1 hour
+      delay: 10 # seconds to wait between retries
+      failed_when: backup_status.ise_response.justComplete != 'yes'
+
+    - name: Backup Completed
+      when: backup_status.ise_response.status == 'COMPLETED'
+      vars:
+        status: "{{ backup_status.ise_response }}"
+      ansible.builtin.debug:
+        msg:
+          - "{{ status.hostName }}"
+          - "{{ status.status }}"
+          - "{{ status.message }}"

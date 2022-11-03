@@ -1,0 +1,86 @@
+---
+- name: Test ISE Node Services
+  hosts: ise-ppan
+  gather_facts: no
+  vars_files: vars/main.yaml
+  tasks:
+    - name: Get ISE PPAN Name from Inventory
+      ansible.builtin.set_fact:
+        ise_ppan_name: "{{ groups['role_PrimaryAdmin'] | first }}"
+
+    #
+    # Ⰹ ISE REST API: GET /api/v1/deployment/node/
+    #   Detailed information of the deployed node
+    #
+    - name: Get Node by Name | {{ inventory_hostname }} (hostvars[ise_ppan_name].ansible_host)
+      cisco.ise.node_deployment_info:
+        ise_hostname: "{{ hostvars[ise_ppan_name].ansible_host }}"
+        ise_username: "{{ ise_username }}"
+        ise_password: "{{ ise_password }}"
+        ise_verify: "{{ ise_verify }}"
+        ise_debug: "{{ ise_debug }}"
+        hostname: "{{ inventory_hostname }}"
+      register: deployment_ise_node
+
+    - ansible.builtin.debug: var=deployment_ise_node
+
+    # Example output:
+    # ```
+    # deployment_ise_node:
+    #   changed: false
+    #   failed: false
+    #   ise_response:
+    #     fqdn: ise-ppan.trust0.net
+    #     hostname: ise-ppan
+    #     ipAddress: 172.31.2.11
+    #     nodeStatus: Connected
+    #     roles:
+    #     - Standalone
+    #     services: []
+    # ```
+
+    # Ⰹ ISE REST API: PUT /api/v1/deployment/node/{hostname}
+    #   Updates the ISE node roles and services.
+    #   Restarts the application server
+    #   Approximate execution time - 600 seconds!
+
+    - name: Update ISE Node Roles & Services
+      cisco.ise.node_deployment:
+        ise_hostname: "{{ hostvars[ise_ppan_name].ansible_host }}"
+        ise_username: "{{ ise_username }}"
+        ise_password: "{{ ise_password }}"
+        ise_verify: "{{ ise_verify }}"
+        ise_debug: "{{ ise_debug }}"
+        state: present
+        hostname: "{{ inventory_hostname }}"
+        roles: "{{ roles | default(['Standalone']) }}" # list
+        services: "{{ services | default(['Profiler','Session']) }}" # list
+      register: ise_node_update
+
+    - ansible.builtin.debug: var=ise_node_update
+
+    # Example output:
+    # ```
+    # ise_node_update:
+    #   changed: true
+    #   failed: false
+    #   ise_response:
+    #     fqdn: ise-ppan.trust0.net
+    #     hostname: ise-ppan
+    #     ipAddress: 172.31.2.11
+    #     nodeStatus: Connected
+    #     roles:
+    #     - Standalone
+    #     services:
+    #     - Session
+    #     - Profiler
+    #   ise_update_response:
+    #     success:
+    #       message: Node was updated successfully.In a few moments, the application server will be restarted on the node due to the Policy Service persona change.  The restart may take up to 10 minutes.
+    #     version: 1.0.0
+    #   result: Object updated
+    # ```
+
+    - name: Wait for ISE Restart
+      when: ise_node_update.changed
+      ansible.builtin.include_tasks: tasks/ise/wait_for_ise_restart.yaml

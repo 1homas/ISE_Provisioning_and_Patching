@@ -1,0 +1,10 @@
+---
+# tasks file for roles/print_output
+
+
+  - name: output
+    ansible.builtin.debug:
+      msg: "{{ output.stdout | replace('\n\n','\n') }}"
+
+
+...

@@ -1,0 +1,37 @@
+---
+- name: SG_Public Security Group
+  amazon.aws.ec2_group:
+    vpc_id: "{{ vpc.vpc.id }}"
+    # region: "{{ vpc_region }}"
+    state: present
+    name: SG_Public
+    description: Public Access Security Group
+    rules:
+      - rule_desc: ICMP
+        proto: icmp
+        from_port: -1
+        to_port: -1
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 0
+        to_port: 65535
+        cidr_ip: 0.0.0.0/0
+        rule_desc: Allow everything TCP
+      - proto: udp
+        from_port: 0
+        to_port: 65535
+        cidr_ip: 0.0.0.0/0
+        rule_desc: Allow everything UDP
+    # rules_egress:
+    #   - proto: any
+    #     cidr_ip: 0.0.0.0/0    # any
+    #     rule_desc: Any
+    tags:
+      Name: SG_Public
+      project: "{{ project_name | default('') }}"
+      environment: demo # [Prod, Dev, QA, Stage, Test]
+      started: "{{ '%Y-%m-%dT%H:%M:%S-%Z' | strftime }}"
+      owner: "{{ owner }}"
+    register: result
+# - ansible.builtin.debug: var=result
+

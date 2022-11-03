@@ -1,0 +1,97 @@
+---
+# tasks file for roles/ise_node_ppan_from_inventory
+
+# - ansible.builtin.debug: var=inventory_hostname
+# - ansible.builtin.debug: var=ansible_host
+
+- name: Get PPAN from Inventory
+  ansible.builtin.set_fact:
+    ise_ppan_name: "{{ groups['role_PrimaryAdmin'] | first }}"
+
+- name: PPAN Node Info
+  when: inventory_hostname == ise_ppan_name
+  delegate_to: localhost
+  cisco.ise.node_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username }}"
+    ise_password: "{{ ise_password }}"
+    ise_verify: "{{ ise_verify }}"
+    ise_debug: "{{ ise_debug }}"
+    name: "{{ inventory_hostname }}"
+  register: node_info
+
+  # Example ISE PAN response:
+  # ```
+  # node_info:
+  #   changed: false
+  #   failed: false
+  #   ise_response:
+  #     displayName: ise-1
+  #     fqdn: ise-1.trust0.net
+  #     gateWay: 10.105.238.1
+  #     id: da371490-545c-11ec-ba61-0050568a610e
+  #     inDeployment: false
+  #     ipAddress: 172.31.2.11
+  #     ipAddresses:
+  #     - 172.31.2.11
+  #     ipV6Addresses: []
+  #     name: ise-1
+  #     nodeServiceTypes: SESSION,PROFILER,DEVICE ADMIN
+  #     otherPapFqdn: ''
+  #     papNode: true
+  #     primaryPapNode: false
+  #     pxGridNode: true
+  #     sxpIpAddress: ''
+  # ```
+
+# - ansible.builtin.debug: var=node_info
+# -------------------------------------------------------------------------
+# Standalone ⮕ Primary: 🕑  ~60 seconds
+# -------------------------------------------------------------------------
+#
+# Ⰹ ISE REST API: POST /api/v1/deployment/primary
+# Promotes the node on which the API is invoked to the primary ISE PAN.
+# Approximate execution time ~60 seconds!
+# This will not trigger an ISE Application Server Restart!
+#
+- name: Standalone to Primary | {{ inventory_hostname }} ({{ ansible_host }})
+  when:
+    - inventory_hostname == ise_ppan_name
+    - not node_info.ise_response.inDeployment # standalone
+    - not node_info.ise_response.primaryPapNode
+  cisco.ise.node_standalone_to_primary:
+    ise_hostname: "{{ ansible_host }}" # PPAN!
+    ise_username: "{{ ise_username }}"
+    ise_password: "{{ ise_password }}"
+    ise_verify: "{{ ise_verify }}"
+    ise_debug: "{{ ise_debug }}"
+  register: standalone_to_primary
+  changed_when:
+    - standalone_to_primary is defined
+    - standalone_to_primary.ise_response is defined
+    - standalone_to_primary.ise_response.success is defined
+    - standalone_to_primary.ise_response.success.message is defined
+    - standalone_to_primary.ise_response.success.message is search("successfully")
+
+  # Example output:
+  # ```
+  # standalone_to_primary:
+  #   changed: false
+  #   failed: false
+  #   ise_response:
+  #     success:
+  #       message: Node was updated successfully.
+  #     version: 1.0.0
+  #   result: ''
+  # ```
+
+# - ansible.builtin.debug: var=standalone_to_primary
+
+# If you do not give the PPAN a literal minute to settle you may get error:
+#  [500] - The server could not fulfill the request.
+- name: Give ISE PPAN a Minute
+  when:
+    - inventory_hostname == ise_ppan_name
+    - standalone_to_primary.changed
+  ansible.builtin.pause:
+    seconds: 60

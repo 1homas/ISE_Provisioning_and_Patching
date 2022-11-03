@@ -1,0 +1,23 @@
+---
+# tasks file for roles/ise_node_info
+
+- name: Get All ISE Node Names and IDs
+  delegate_to: localhost
+  cisco.ise.node_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username }}"
+    ise_password: "{{ ise_password }}"
+    ise_verify: "{{ ise_verify }}"
+    ise_debug: "{{ ise_debug }}"
+    name: "{{ inventory_hostname }}"
+  register: node_info
+
+# - name: Show node_info
+#   ansible.builtin.debug: var=node_info
+
+- name: Set ise_nodes_info
+  ansible.builtin.set_fact:
+    ise_nodes_info: "{{ ise_nodes_info | default([]) + [ node_info.ise_response ] }}"
+
+- name: Show ise_nodes_info
+  ansible.builtin.debug: var=ise_nodes_info

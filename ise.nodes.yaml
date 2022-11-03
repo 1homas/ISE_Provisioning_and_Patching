@@ -1,0 +1,32 @@
+---
+- name: Get ISE Nodes
+  hosts: ise
+  gather_facts: no
+  vars_files: vars/main.yaml
+  tasks:
+    - name: Get All ISE Nodes in the Deployment
+      delegate_to: localhost
+      cisco.ise.node_deployment_info:
+        ise_hostname: "{{ ansible_host }}"
+        ise_username: "{{ ise_username }}"
+        ise_password: "{{ ise_password }}"
+        ise_verify: "{{ ise_verify }}"
+        ise_debug: "{{ ise_debug }}"
+      register: deployment_info
+
+    - name: Show ISE Nodes
+      ansible.builtin.debug:
+        var: deployment_info
+
+    - name: Show ISE Facts Summary Table
+      delegate_to: localhost
+      when:
+        - deployment_info is defined
+        - deployment_info.ise_response | length > 0
+      vars:
+        # maxw: 30
+        # head: "{{ facts_head }}"
+        hide: ['ipAddress']
+        rows: "{{ deployment_info.ise_response | flatten }}"
+        temp: "{{ lookup('template', 'list_of_dicts.j2') }}"
+      ansible.builtin.shell: "echo '{{ temp }}' > /dev/tty"

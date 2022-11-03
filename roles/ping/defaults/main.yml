@@ -1,0 +1,7 @@
+---
+# defaults file for roles/ping
+
+ping_delay: 5
+ping_retries: 100
+
+...

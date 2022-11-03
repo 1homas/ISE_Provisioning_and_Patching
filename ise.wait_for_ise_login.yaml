@@ -1,0 +1,15 @@
+---
+- name: Environment Check
+  hosts: localhost
+  gather_facts: no
+  roles:
+    - ise_env_ansible_valid # ISE Ansible environment is OK
+
+- name: Wait for ISE Login
+  hosts: ise
+  gather_facts: no
+  vars_files:
+    - vars/main.yaml
+  strategy: free
+  roles:
+    - wait_for_ise_login # SSH > HTTPS > Login Screen
