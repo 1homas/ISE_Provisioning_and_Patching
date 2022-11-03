@@ -4,7 +4,6 @@
   gather_facts: no
   vars_files: vars/main.yaml
   roles:
-    - wait_for_ise_login
     - ise_facts_standalone
     - role: print_vars
       vars:
