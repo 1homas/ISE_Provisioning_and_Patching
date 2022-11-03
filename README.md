@@ -45,35 +45,46 @@ source ~/.secrets/ise_aws.sh
 source ~/.secrets/ise_repository.sh
 ```
 
-Edit the project and deployment settings in `vars/main.yaml` to match your dCloud environment or preferences. If you change the `project_name` variable, you *must* update the y, you will want to update the project name:
-
-```yaml
-
-```
-
-Run an Ansible playbook:  
-
-```sh
-ansible-playbook playbook.yaml
-```
-
-
 ## Variables
 
+Edit the `vars_files` list in `1_provision--ask-pass.yaml` to determine which ISE deployment size (standalong, small, medium, large) you will provision. You may also edit the respective `vars/ise_deployment_*.yaml` files to customize your ISE node names, roles, services, IP addresses, etc.  
+
+Edit the project and deployment settings in `vars/main.yaml` to match your environment and preferences:
+
+| Variable | Description |
+|----------|-------------|
+| `project_name` | Use this as a tag for your cloud resources. Useful for filtering on all resources for this project versus others you may be running. Also used as the default SSH Key passphrase. |
+| `owner` | Your name or email to identify who is responsible for these cloud resources |
+| `domain_name` | Used for ISE FQDN naming and AWS Route53 DNS updates. |
+| `ise_image` | The ISE AMI ID. See https://cs.co/ise-aws to customize this for your desired ISE version and your region(s). |
+| `ise_instance_type_default` | See https://cs.co/ise-scale for the available instance types/sizes you may run. |
+| `ise_security_group_default` | The name of the security group to apply to the ISE nodes |
+| `timezone` | Your preferred timezone for the ISE nodes |
+| `ntp_server` | Your preferred time server |
+| `dns_server` | Your preferred DNS Server IP address |
+| `ise_init_password` | The initial password to provision the ISE nodes with |
+| `ise_username` | The ISE REST username to use for API-based operations |
+| `ise_password` | The ISE REST password to use for API-based operations |
+| `ise_verify` | Use certificate validation (true) or not (false) |
+| `ise_debug` | Enable debugging (true) or not (false) |
+| `ise_radius_secret` | Your primary RADIUS secret |
+| `ise_tacacs_secret` | Your primary TACACS secret |
+
+
+
+Run an Ansible playbook:
+
+> 💡 The `--ask-pass` option will have Ansible ask you to type the SSH Key passphrase to use it for the password reset command. The default SSH Key passphrase is the `project_name`.
+
 ```sh
-  export ISE_USERNAME='admin'
-  export ISE_PASSWORD='C1sco12345'
+ansible-playbook 1_provision--ask-pass.yaml --ask-pass
+ansible-playbook 2_ise_facts.yaml
+ansible-playbook 3_patch.yaml
+ansible-playbook 4_deployment.yaml
+ansible-playbook 5_configuration.yaml
+ansible-playbook 6_backup_now.yaml
+ansible-playbook 7_destroy.yaml
 ```
-
-> 💡 Add one or more spaces before the `export` commands to prevent these commands with your secrets from being saved to your shell history
-
-
-
-
-
-
-
-
 
 ## License
 
