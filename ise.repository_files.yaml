@@ -1,8 +1,5 @@
 ---
-#
-# Run with `ansible-playbook playbook.yaml`
-#
-- name: Show Repository
+- name: Show Repositories and Files
   hosts: localhost
   gather_facts: no
   vars_files: vars/main.yaml
@@ -10,7 +7,7 @@
     ise_ppan_name: "{{ groups['role_PrimaryAdmin'] | first }}"
     ansible_host: "{{ hostvars[ise_ppan_name].ansible_host }}"
   tasks:
-    - name: Get Repository
+    - name: Get Repositories
       cisco.ise.repository_info:
         ise_hostname: "{{ ansible_host }}"
         ise_username: "{{ ise_username }}"
